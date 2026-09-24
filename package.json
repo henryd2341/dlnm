@@ -1,0 +1,23 @@
+{
+  "name": "dlnm-first-playable",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "node scripts/check-mvu-schema.ts && node scripts/check-mvu-bridge.ts && node scripts/check-card.ts",
+    "build": "vite build --mode schema && vite build && npm run pack",
+    "pack": "node scripts/build-card.ts"
+  },
+  "dependencies": {
+    "vue": "3.5.43",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.9",
+    "typescript": "5.9.3",
+    "vite": "8.3.0",
+    "vue-tsc": "3.3.11"
+  }
+}

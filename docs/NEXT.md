@@ -1,15 +1,17 @@
 # 当前进度与续接门
 
-更新时间：2026-09-22。此文件是唯一的进度入口。
+更新时间：2026-09-24。此文件是唯一的进度入口。
 
 ## 1. 当前结论
 
-- 已完成：把本任务已确认的总设计、单蓝图和验收合同创建到 docs。
-- 当前阶段：设计文档落盘与一致性核对；实现尚未启动。P0 仅有前序资料与接口线索，尚未满足完整退出条件。
-- 当前许可：用户明确要求“文档放 docs/ 里，现在可以开始创建了”，覆盖三份 Markdown 文档；不扩大为写代码、修改酒馆或调用模型。
-- 当前产品状态：没有首版源码、导入包或运行验收结果；不要将文档创建标成产品完成。
+- 保留成果：人物字段、初始值、成长规则、原作分层与素材边界继续有效。旧 P0 的 43 项检查含已废止协议，仅作历史证据，不代表 MVU Zod 路线已通过。
+- 当前阶段：用户已接受 P1，并在 R2 之后明确反馈“变量方面已经没有问题了”。变量故障按用户反馈关闭，保留现有 MVU 初始化和保存链；这不代表完整 P3 异常恢复或全部前端已经验收。
+- 当前许可：本轮用户要求拆分任务并写入 NEXT，故只更新本文件，不实施功能、不构建新包、不安装扩展。后续实施仍遵守“不擅自测试，阶段完成先打包成品，再由用户手动验收”；自动测试、类型检查、lint、浏览器、真实酒馆、模型调用均须另有明确许可，旧许可不续用。安装、Git 写操作、部署、发布另列边界。
+- 当前产品状态：进入“前端优化＋世界书完善”的计划阶段，执行顺序见 4.0。前端仍有流式/自动刷新、纯文本显示、旧面板与占位图问题，世界书内容偏技术。R2 是现有可回退成品；本轮没有新产品交付，也不推定其余 UI 已验收。
 - 蓝图：`single-blueprint`，深度 1，子蓝图 0，`runtimePersistentBlueprintBudget = 0`。
-- 临时问题支线：无。
+- 临时问题支线：无活动项。旧浏览器/Blob 问题只保留证据；先前全局渲染选项申请停止追问，不视为当前入口，也没有得到修改许可。后续只有最终前端实际遇到相关问题时再处理。
+
+旧 P0 合同归档：输入为当时 DESIGN、原作对照、两张参考图路径与本机公开宿主源码；输出为机器字段、旧格式样例、来源分层及依赖/素材账目，结果见 3.3。字段、来源等成果保留，技术退出条件已由当前 BLUEPRINT 的 MVU Zod 合同取代，定向回补见第 4 节。旧 P0 当时未写宿主、创建测试聊天、调用模型或复制游戏素材。
 
 先读 [总设计案](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/docs/DESIGN.md)，再读 [实施蓝图](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/docs/BLUEPRINT.md)。保持三者职责分离，不在这里重复全部字段和需求。
 
@@ -18,15 +20,20 @@
 - 玩家是诺雅；共用香气只是日常邀请，不是强制任务。
 - 月光都市瑟雷妮亚首版重意境，不扩成街道百科。
 - 重型同层前端托管聊天呈现；真实聊天与生成仍走酒馆。NVL，人物栏独立，桌面和手机同等重要。
+- **2026-09-24 最新前端要求：**流式及非流式回复自动更新；正文支持 Markdown 与经清理的 `v-html`；保留浏览器 Fullscreen API，弃用旧面板模式，非全屏改为只显示扩宽“人物与状态”栏的轻前端，不显示场景图。
+- **2026-09-24 素材与内容要求：**项目 public 图片仅作开发占位；正式运行由用户自行安装 Illustration-Gremlin 并导入图包。完善世界观、人物索引与具体条目；允许模型在正文使用 `<span style="color: red">文字</span>` 染色。展示染色不等于获得新的游戏颜色，不改变既有变量合同。
+- **2026-09-23 补充：前端固定 Vue 3 + TypeScript + Vite。** 已获项目内安装许可并锁定版本，见第 4 节；不新增独立站点或平行状态系统。
 - “清洗”已更正为“洗涤”。莉莉希雅数值好感度取消，也没有隐藏替代。
 - 感度上限 1000；欲求上限 100 且初始 0。其他初始值以总设计的唯一字段表为准，不按上限变化自动放大。
 - 已有红、绿、蓝、橙四种颜色；初始界面不是重新失去四种颜色的空白档。
-- 原生消息变量＋同次生成状态变化＋小型校验；首版不额外引入 MVU、数据库或第二次更新模型调用。
+- **2026-09-23 最新纠正：变量系统固定 MVU Zod，不受模式影响。** 原生消息变量只是其宿主存储层，项目不再自建变量协议、结算器或平行状态源。
+- **卡片须实际绑定世界书与正则。** 必要设定、变量规则、当前状态上下文和前端呈现均须有对应组件；无绑定的空壳卡回复不算上下文验证。
+- **取消独立的“酒馆能生成”测试。** 复用宿主生成；验收的是最终前端、正文、MVU 状态、上下文与历史/分支是否一致。保存恢复和异常处理作为该产品链路的一部分保留。
 - 异常处理已选 A：保留正文、草稿和上一份有效状态；暂停下一轮；主动修复或重生成后再继续，不自动发送草稿。
 
 ## 3. 已有证据与边界
 
-### 3.1 本次文件检查
+### 3.1 前序文档创建检查（历史记录，非本轮工作树状态）
 
 - 创建前目录无目标三文件，采用新增而非覆盖。
 - 创建前 Git 状态仅有未跟踪的 `AGENTS.md`；保持原样，不纳入本次修改。
@@ -40,7 +47,7 @@
 
 宿主入口：[本地 SillyTavern](http://127.0.0.1:8000/)。本任务前序观察到 SillyTavern 1.17.0 release（提交 aa50edcf4）、酒馆助手 4.8.7；另外存在 JS runner in SillyTavern 1.0.0，它与酒馆助手不是同一个组件。实施前复查实际版本，不把旧观察当成当前持续事实。
 
-前序还观察到正则、Prompt Template 及酒馆助手渲染相关能力；没有验证 MVU 的实际运行状态，不从欢迎页推断其安装情况。当前路线也不依赖新增 MVU。
+前序还观察到正则、Prompt Template 及酒馆助手渲染相关能力；没有验证 MVU 的实际运行状态，不从欢迎页推断其安装情况。新路线已固定 MVU Zod，实际版本/来源与加载状态仍需核实。
 
 接口来源：
 
@@ -65,34 +72,356 @@
 
 可定位的前序源码线索：源码映射中的 `src/function/variables.ts`、`src/function/chat_message.ts`、`src/function/event.ts`、`src/function/inject.ts`、`src/util/tavern.ts`；宿主脚本当时约 L3453～L3458。升级后重定位，不硬编码行号或依赖私有实现永远不变。
 
-### 3.3 验收状态
+### 3.3 旧路线 P0 退出记录（技术协议部分已被最新纠正取代）
+
+本轮变更只有现有三份 docs 文档，以及新增 [P0 合同检查](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/scripts/check-p0.mjs)。无新增蓝图、目录索引、框架、依赖或产品模块；原子结算、分支去重等运行逻辑尚未制作。
+
+| P0 退出项 | 结果与证据 |
+| --- | --- |
+| 字段、初始值、范围、读写者 | 通过：DESIGN 第 6 节保留 11 个数值基线，追加机器路径；6.2 明确 8 个非数值字段及共同生命周期 |
+| 正文/清单确定分离 | 通过：7.5 固定唯一尾部标记及 v1 JSON，3 份人工格式样例；重复、截断、尾随文本与损坏样例被拦截 |
+| 空清单与缺失不同 | 通过：空数组保持原状态；缺块检查报错；不把缺失当无变化 |
+| 边界处理 | 通过：12 个文内边界样例；上下界、变化档位、0 和长期负数；整轮异常不改基线、重复颜色去重另有检查 |
+| 来源分层、素材与使用门 | 通过：8.1 登记原文行号/哈希、书内观点、同人选择与译文错配；头像/背景尚未选定，P2/P5 使用门明确 |
+| 依赖版本 | 通过：8.2 记录 ST 1.17.0 aa50edcf4、助手 4.11.0、Node v24.16.0 与来源指纹；源码事实与真机未验项分开 |
+
+自动检查（2026-09-22）：
+
+- 在项目根目录运行 `node scripts/check-p0.mjs`：`P0 PASS: 43 contract checks; no host, persistence, or model acceptance implied.`。脚本直接读取 DESIGN 内的表格与样例，不引入测试框架、不访问网络、不写宿主。
+- `node --check scripts/check-p0.mjs`：退出码 0。
+- `git diff --check`：退出码 0；只有 Windows 行尾转换提示，无空白错误。这是只读检查，没有暂存、提交、分支或其他 Git 写操作。
+- 三份文档的本地文件链接、UTF-8 替换字符检查通过；蓝图仍为 P0～P5 六阶段、T01～T17 十七个验收场景、持久蓝图预算 0。
+- `AGENTS.md` SHA256 仍为 `9BCDF80618F6DF98670AFE27B7CA6908ABED4CCF2687CFE2C6FCCB98C10D8DB6`，未改规则文件。
+- 项目暂无产品构建、类型检查或 lint 配置；本轮只执行实际存在的 Node 语法与合同检查，不称为产品构建通过。
+
+独立只读核对：P0 合同满足退出条件；核对时发现 NEXT 仍夹带前序“只创建文档”的当前时态，本次已将其标为历史并更新当前进度。属于正常退出检查单，未开启问题支线或新增权威文件。
+
+宿主复查只使用本机公开静态资源与 `/version` GET；没有读取真实聊天、角色配置、扩展设置或密钥。助手版本已变化，旧 4.8.7 记录只作历史。4.11.0 变量 API 没有 swipe_id 选项，按当前选中分支读写；P1 须用同步写入和写前身份核对，不把回读检查当作防串分支的替代。
+
+### 3.4 验收状态
 
 | 证据类别 | 当前状态 |
 | --- | --- |
-| 自动化 | 产品测试尚未建立；仅执行文档级检查 |
-| 静态 | 总设计、蓝图及续接文件已创建；前序有资料与接口源码核对 |
-| 真实宿主 | 仅前序只读界面观察；未导入测试卡、未验证聊天闭环、保存或手机表现 |
-| 用户 | 设计选择与文档创建已确认；原型布局、实际可玩性与首版产品尚待验收 |
+| 自动化测试 | **本轮未执行。** 现有检查源码及历史结果保留；后续计划里的验收场景均不是通过记录 |
+| 本次构建/打包 | 本轮仅写计划，没有构建或打包。R2 及更早的交付事实见第 4 节历史记录 |
+| 源码阅读 / 浏览器 | 已阅读当前前端、卡内容、Vite 配置和素材目录，并读取上游扩展文档；未运行浏览器或前端 |
+| 真实宿主 | **代理本轮未执行。** 未安装扩展、导入图包、操作消息、改设置或调用模型 |
+| 用户 | “变量方面已经没有问题了”为最新人工反馈；只关闭该问题，不扩大为完整 P2/P3 验收 |
 
-## 4. 下一步：从 P0 开始，不越过 P1
+## 4. 下一目标与既有交付
 
-用户明确启动实施后：
+### 4.0 前端优化与世界书完善：任务拆分（2026-09-24）
 
-1. 复读三份文档，复查工作树与实际宿主版本，保留用户新增改动。
-2. 完成 P0 的最小机器格式、字段生命周期、边界样例与素材使用缺口；不重新采访已固定的创作决定。
-3. 为 P1 选择最小接入方式；先验证现有能力，不预装框架或更新插件。
-4. 真实酒馆导入、发送测试消息和模型调用按明确的测试对象与范围执行；范围尚未明确时停在对应门，不借“按蓝图”触碰已有聊天或自动调用付费接口。
-5. P1 未通过前，完整视觉、全部字段和场景内容保持后续阶段，不把工作转移当作通过。
+**目标：**真实回复自动、连续地出现在 NVL 中；支持 Markdown 和正文染色；非全屏提供轻量人物状态栏；接入可替换图片与地点映射；世界书从技术骨架补成有事实依据的世界观和人物资料。
 
-可执行续接语句：**“按 docs 中的蓝图开跑第一版，先完成 P0；真实酒馆导入、测试发送与模型调用另行确认。”**
+**执行边界：**本节是待执行计划。本轮只写 NEXT，所有实施项尚未开工。保留已获用户确认的变量链、19 字段、YAML 初值、消息/分支存储和原生生成；不借优化重新设计状态系统。继续使用 Vite 开发地址，远程仓库建立后再换地址。旧成品、素材原件和冲突文件保持；不把“进入下一目标”解读为测试、安装或发布许可。
 
-本次到三份文档写入、检查和汇报即停止；用户尚未要求进入代码实现。
+**与原阶段的关系：**UI 工作接续 P2；本次世界书完善是用户明确前移的原 P4 内容子项，不以 P3 尚未完整验收为由搁置，但也不标记 P3/P4 整体完成。DESIGN/BLUEPRINT 中“纯文本、面板模式、尚无项目图片”等旧合同由 N0 定向同步；同步前以本节最新用户纠正为准，不另建一套蓝图。
+
+#### 已核对的起点（只读事实）
+
+- [消息接入](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/nvl.ts) 目前订阅接收/编辑/结束事件，但没有原生流式 token 订阅；监听又绑在阅读模式 acquire/release 上。下一步要同时修复流式呈现与非流式自动收尾，别只加一个事件后保留生命周期断口。
+- [阅读组件](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/NvlView.vue) 用文本插值显示回复，头像/场景仍为 CSS/SVG 占位。现有 `visibleBody` 只删完整变量块，流式半截块也要处理。
+- [显示格式接口声明](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/@types/function/displayed_message.d.ts) 表明 `formatAsDisplayedMessage` 会再次应用宏和角色正则；本卡 [显示正则](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/card.ts) 会在回复尾部插入前端。因此该接口不是可直接套上的 Markdown 渲染器，实施前需绕开前端插入规则并核对运行版本。
+- [Vite 配置](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/vite.config.mjs) 是 `publicDir: false`，开发根为 dist；项目中存在 public 图片不等于当前 Vite 地址已经能加载它们。
+- [public](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/public) 现有 69 张 PNG：背景 20 张（10 组日/夜）；人物目录 lilicia 20、noah 20、seraphina 4、tanuki 5。目录名只是素材线索，不自行推定角色身份、剧情事实或正式素材资格；目前未见城市场景图。
+- [卡片内容](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/card-content.ts) 仍是 5 条世界书：初值、简短关系、状态投影、字段规则、更新格式。欠缺人物详细资料、世界设定与检索组织。
+- 原作对照文件 [ManualTransFile.json](E:/ReinoAre/RJ01521464/ManualTransFile.json) 本轮确认存在，674,888 字节；事实提取仍需按 [DESIGN 第 8 节](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/docs/DESIGN.md) 的原文线索逐项复核，不把旧行号或文件名当设定正文。
+
+#### 执行顺序与交付门
+
+`N0 → N1 → N2 → 成品 A／用户手验 → N3 → N4 → 成品 B／用户手验 → N5 → 成品 C／用户手验`
+
+- A：消息实时显示、Markdown 与染色闭环。
+- B：全屏＋轻前端、图片映射及 Illustration-Gremlin 接入。
+- C：世界观/人物世界书与前端一致的完整修订卡。
+- 每次手验未通过，停在对应小阶段修正；先打包再交用户，不在打包前擅自运行测试。N5 的原作只读整理可提前进行，但正式内容落盘仍按清单和来源边界处理。
+
+#### N0 · 锁定本轮合同与素材命名（待实施）
+
+- **做什么：**定向同步 DESIGN/BLUEPRINT；把“全屏 NVL＋轻前端”“自动回复”“Markdown/染色”“开发占位与正式图包”写清，保留变量已解决的结论。整理最小地点/时间段/人物图片对照表和世界书条目提纲，避免 UI 与提示各用一套名称。
+- **素材约定：**对照现有文件，确认 `living`、`hall_outside`、`rouka` 等实际画面后再确定中文地点；为日/夜图片明确 `world.period` 映射，清晨/傍晚等未有专图的时段保留明确选择，不假装已有专用素材。`world.location` 保留现有文本字段，用规范名及有限别名映射，不强行扩成新 Schema 枚举。
+- **图包命名：**同一卡片中两位主角都属于同一图包作用域；public 下各目录的 `default.png`、`smile.png` 等会重名。图包使用 `noah__default.png`、`lilicia__default.png`、`bg__living_day.png` 等唯一逻辑名；只改图包副本/映射，原始 public 文件保持原名。
+- **完成标准：**六项需求都有对应任务；记录缺图、未确定角色名/场景名，不造资料补齐；技术合同没有新增状态写入者、依赖库或部署路线。
+
+#### N1 · 流式显示与回复自动同步（待实施；对应需求 1）
+
+- **主要范围：**[src/nvl.ts](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/nvl.ts)、[src/NvlView.vue](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/NvlView.vue)、必要的入口生命周期。
+- **先定位：**沿当前原生发送按钮追踪真实酒馆的流式/非流式事件与消息保存顺序；确认 token 载荷是完整文本还是增量、消息何时分配楼层。不要把只服务 Helper 自有生成接口的事件套到当前原生发送链，也不要把结束事件参数直接当可靠楼层号。
+- **实施：**建立只负责显示的临时流式正文，按当前聊天、当前生成和回复分支隔离；随到随显示，并将高频刷新合并到浏览器帧，避免每个 token 重扫全部历史。生成完成自动回读真实回复；非流式完成也立即刷新；MVU 状态另等保存完成后自动更新，不要求点“重新读取”。
+- **边界：**临时文本不写聊天或 MVU；生成期间人物状态保留上一份有效值并标明同步中。未闭合的 UpdateVariable/Analyze/JSONPatch 与前端占位片段不泄露到正文；停止、异常、切聊天、换分支时丢弃过期显示任务。阅读旧消息或主动上滚时不抢回最新，不覆盖草稿；最新阅读区才按用户滚动位置决定跟随。
+- **待手验：**流式边生成边出现；非流式无需手动重读；末段/末字不丢、不重复；停止/失败保留已收正文和草稿；新楼 iframe 替换后保持阅读与全屏接管；历史回看不被新流挤走，状态最终与真实所选楼层一致。
+
+#### N2 · Markdown、v-html 与模型染色约定（待实施；依赖 N1；对应需求 2、6）
+
+- **主要范围：**阅读组件、消息显示转换，以及卡内容中的“正文呈现约定”。实时与历史正文共用一条转换路径。
+- **显示管线：**剥离技术块 → 使用已核对的宿主 Markdown 能力 → HTML 清理 → `v-html`。先核对宿主现成解析器和清理器，复用可用实现；不手写 Markdown 解析器，也不未经确认增装依赖。避免再次套用本卡插入前端的显示正则；不嵌套新的 iframe/loader，不双重转义，不把渲染 HTML 写回原始回复。
+- **保留能力：**段落、换行、加粗/斜体、列表、引用、代码块、常规链接，以及 `<span style="color: red">文字</span>`。在 ShadowRoot 内补齐这些元素的排版，处理长代码/链接和窄屏；流式遇到半截 Markdown/标签不破坏页面，完成后重渲染为最终格式。
+- **HTML 边界：**`v-html` 只接收已清理的结果；span 仅保留经过颜色值校验的 `color`，不开放任意 style、事件属性、脚本、iframe、表单或可执行链接。代码块里的标签保留为字面文本；普通颜色文本不被二次清理抹掉。
+- **模型指示：**明确允许在正文少量使用 Markdown 和闭合的染色 span，给出红色/其他合法颜色的正例；不要把整段正文包成 HTML 文档。染色只影响呈现，不修改 `noa.colors`、不自动触发奖励，不在 JSONPatch 技术块里插入 HTML，原有“唯一完整更新块”合同不变。
+- **待手验：**同一条实时/历史回复格式一致；染色可见且黑底可读；闭合/未闭合标签、引用和代码块呈现正确；含脚本/事件属性的文本不执行；技术块及前端入口不混入正文。
+- **成品 A：**构建并形成新版本卡 JSON、JS/CSS/HTML、说明和 ZIP；说明列出流式、非流式、历史、停止、Markdown、染色手验步骤与未测项。用户接受后继续 N3。
+
+#### N3 · 删除旧面板，非全屏改为轻前端（待实施；依赖成品 A；对应需求 3）
+
+- **主要范围：**入口组件、人物栏复用、全屏生命周期与模式存储。使用最小共享人物栏，避免两套字段展示逐渐不一致。
+- **轻前端：**仅显示扩宽的“人物与状态”栏，可附全屏入口和必要状态提示；不放场景图、NVL 正文、历史导航或第二个发送框。原生聊天正文和原生输入继续可见、可用，不再托管或隐藏整个 chat；宽度跟随可用消息区域，手机重新排布人物信息。
+- **全屏：**保留浏览器 Fullscreen API，继续承载场景、正文、输入和历史；返回/Escape 回到轻前端。全屏/轻前端都自动更新人物状态，监听生命周期不再依赖“已进入全屏”才存在。
+- **删除与兼容：**删除旧 panel 入口和隐藏 chat/form 的 CSS 路径；已有会话中的 `mode: panel` 仅迁为轻前端，保留草稿/阅读位置，其他旧会话字段按已有语义兼容，不清空聊天记录。
+- **待手验：**不进入全屏也能看到宽人物栏；轻前端没有场景图且原生聊天可用；双端无横向挤出；反复全屏/退出无残留样式、重复监听或重复人物栏；用户原生发送后状态自动更新。
+
+#### N4 · 替换图像占位，接入地点映射与图包（待实施；依赖 N0、N3；对应需求 4）
+
+- **主要范围：**素材映射、人物栏/全屏场景、[delivery.config.mjs](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/delivery.config.mjs)、Vite/打包器的最小资源处理及说明。
+- **开发占位：**按已确认映射使用 public 中的图片替换当前几何占位。针对目前 Vite 只服务 dist 的结构，只把映射实际使用的图片送到限定开发资源目录，或增加明确受限的静态资源映射；不要把整个项目根暴露出来。界面和说明继续标注“开发占位图”，本地图片可见不代表正式图包接入完成。
+- **映射：**以已保存的 `world.location + world.period` 选背景；以已存在的莉莉希雅服装/表情等字段选头像，未知值使用明确默认图。诺雅目前没有表情/服装字段时先用固定默认头像，不借素材接入扩充已验收 Schema。历史页使用历史状态选图，异步迟到的图片结果不得覆盖已切走的聊天/场景；未映射地点、缺失夜景/城市图有标注的缺图状态，不让上一地点图片冒充新地点。
+- **正式运行：**说明要求用户自行安装 [Illustration-Gremlin](https://github.com/pokerface-1224/Illustration-Gremlin) 并给当前角色卡导入图包；项目不代装扩展、不改宿主存储。开发 public 来源与正式图包来源明确区分，正式模式缺扩展/缺图时提示安装或补图，不悄悄依赖作者电脑的 public 地址。
+- **接口路线：**在当前角色范围内等待/探测 `IllustrationGremlin`，列图后依据返回的角色与相对路径精确取图，不依赖跨角色占位符查找。用 N0 的唯一图名建立映射，不依赖重名自动编号；图片读取失败不阻断正文和人物数值。Blob URL 只作本次浏览器显示引用，不存进 MVU 或聊天；先核对扩展缓存/URL 所有权，再处理图包更新、刷新、切卡和卸载，避免全屏/轻前端一方释放仍被另一方使用的 URL。
+- **图包边界：**交付命名清单与映射/导入说明；若制作图包则使用单独副本，原图不重命名、不就地覆盖。public 临时图片不默认进入正式卡包、远程仓库或公开发布；资源资格与用户自行准备图包的边界保持明确。
+- **待手验：**日夜/地点映射、头像默认与已有表情映射、历史场景跟随、缺图提示；当前角色图包隔离；导入/更新/删除图片后重新取图；刷新不复用失效 blob URL；全屏/轻前端切换无串图。实际手机图片来源可达性另验，当前 127.0.0.1 不冒充手机可访问地址。
+- **成品 B：**新版本卡与资源 ZIP、轻前端说明、开发占位声明、唯一文件名清单、扩展安装及图包导入说明；正式图包接入与 public 占位分别列出验收状态。用户接受后继续 N5。
+
+#### N5 · 世界观、人物索引与具体世界书（待实施；依赖 N0、N2/N4 词汇合同；对应需求 5）
+
+- **来源先行：**从现有原作对照与 DESIGN 的已确认决定提取本次需要的事实；先形成“来源片段 → 事实/观点 → 目标条目”的短对照，再写条目。区分原作事实、书内理论、译文疑点和本项目同人补充；留任结局、互相依偎、共用香气邀请、玩家是诺雅等已定选择保持。不是把整份翻译 JSON 塞进世界书，也不是另建大型资料库。
+- **最小内容目录：**①续篇时代/起点和世界观总览；②人物索引及译名/别名；③诺雅与莉莉希雅分别的身份、外貌、性格、说话习惯、能力边界、关系与日常行为；④原作有依据且本段会出现的配角，先核实再收录；⑤宅邸及已用房间、月光都市瑟雷妮亚；⑥香气文化、魔力/色彩封印等必要设定，保留原文的不确定语气；⑦地点/人物检索索引与自然触发词。
+- **激活方式：**短核心背景和当前关系保底进入上下文，细节按人物/地点/主题关键词或现有可靠条件激活。索引不是“罗列所有关键词然后递归点亮整本书”：分别配置递归、深度、优先级和预算，确保提到一个人能得到其详细资料，但不会把所有场景一并加载。先用少量有用条目，不用大批空占位条目凑完整。
+- **与技术条目分开：**保留 YAML 初值、MVU 字段规则、已校验状态投影和更新格式；增加内容条目而非覆盖它们。继续携带 N2 的染色/Markdown 正文约定，地点规范名与 N4 映射一致；有设定但暂无图片的地点仍可叙事，不因缺素材限制故事。
+- **维护方式：**优先在现有卡内容来源中小范围分层；篇幅确实妨碍维护时才拆成少量内容文件。保持单一装配来源、稳定条目身份、可追溯原文，不搬整套模板工程、不增自造 CoT 或额外模型更新通道。
+- **待手验：**人物说话与关系有具体依据；城市/宅邸不再只剩技术指示；接受、推迟或改变香气邀请均能继续；查询某人物/地点时实际上下文能命中对应条目；称谓、地点与图像映射一致，技术状态仍可用。实际上下文/生成观察由用户手验，代理未获许可前不发模型请求。
+- **成品 C：**完整修订卡、内嵌世界书、新版资源与 ZIP；附条目索引、事实来源短表、图包使用说明和各项待验记录。交付后等待用户接受，不自动推进完整 P3/P4/P5 或远程发布。
+
+#### 续接入口与资料回执
+
+- **下一步从 N0 开始。** 先读本节与后续用户反馈；变量问题已经用户确认，不回到 R1/R2 的初始化故障排查。执行时逐项更新状态，完成一个成品门即打包交手验。
+- 本轮仅修改 NEXT：源码、DESIGN、BLUEPRINT、public、历史成品及宿主均未改动；没有测试、构建、安装或运行验收。
+- 已读技能：`consult-tavernweave-library`、`sillytavern-embedded-ui`、`tavern-card-builder` 及 material-provenance；Library 快照 `2026-08-18`，采用 A0 目标/红线/验收、A3 世界书组织、A5 渲染管线、C1 iframe 边界，没有采用目录候选。
+- 扩展资料只作接入依据：2026-09-24 只读核对 [官方 README](https://github.com/pokerface-1224/Illustration-Gremlin/blob/222150201c9cd3ab48435fc9b9221ed699d79e24/README.md) 与 [API.md](https://github.com/pokerface-1224/Illustration-Gremlin/blob/222150201c9cd3ab48435fc9b9221ed699d79e24/API.md)，提交 `222150201c9cd3ab48435fc9b9221ed699d79e24`。图包导入展平目录、同名自动编号；前端 API 限当前角色，列图/精确路径/缓存与 URL 生命周期需按用户实际安装版本再核对。本轮没有安装该扩展，也没有图包实测。
+
+### 以下为 R2 及此前交付历史
+
+变量缺失在下方属于当时的问题记录，已由本节顶部的最新用户反馈关闭；旧面板/纯文本要求已被 4.0 的新目标取代，保留记录而非继续执行。
+
+### P2 R2 修复计划（2026-09-24）
+
+- 用户明确“全屏”指浏览器 Fullscreen API；R1 的网页覆盖层不符合要求，且手验仍报告消息 0 缺初值、全屏样式丢失。R1 未通过。
+- 先修复整条样式来源：现有代码拿 iframe 的第一张样式表，可能取到 Helper 自带 Font Awesome，而非本卡 state.css；改为打包内具有唯一标记的本卡编译 CSS，面板和全屏共用同一份样式内容。
+- 全屏由用户点击同步调用 `requestFullscreen()`，监听 `fullscreenchange` 处理 Escape；保留明确选择的面板模式。避免异步加载耗掉点击手势；默认展示全屏入口，不伪装自动全屏。
+- 初值继续追踪实际消费与保存，不把“接口存在”“多等几秒”当修复证据，不强塞默认值。缺少现场条件时保留明确诊断和待定位项。
+- 保留旧卡、历史状态、版本产物及改前备份；本轮不运行测试、typecheck、lint、浏览器或真实宿主，只构建打包后交用户手验。
+
+#### R2 实施证据与未确定项
+
+- 写前备份：`artifacts/p2-r2-backup-20260924-161548/`；没有修改 AGENTS、锁文件、依赖或用户宿主配置。
+- Fullscreen API：[MDN requestFullscreen](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen) 明确需要用户手势，且 dialog 本身不作全屏目标。当前点击链在第一个 await 前请求宿主 documentElement 全屏；取得全屏后打开阅读 dialog，监听 [fullscreenchange](https://developer.mozilla.org/en-US/docs/Web/API/Document/fullscreenchange_event)。加载时只给入口，不自动称已全屏；Escape、返回、面板切换退出本卡全屏。消息 iframe 卸载后有 2 秒接管清理，后继入口接管会取消，未接管则退出，不留下无界空阅读层。
+- 样式选择错误已修：R1 用 `querySelector('link[rel="stylesheet"]')`；本机 Helper bundle 自带前置 Font Awesome link（`dist/index.js` 约 503 行）。R2 将同份编译 CSS 放到 HTML 的 `style#dlnm-nvl-style`，全屏按唯一标记复制到 ShadowRoot，删除错误的首张 link 选择及重复网络样式等待。此为源码缺口定位，真实 CSS 应用仍留手验。
+- initvar 改 YAML 两级映射和列表，由 `src/mvu/schema.ts` 的单份 initialState 生成；不是手写第二套状态，不改 19 字段初值。固定 MVU `variable_init.ts:277-307` 使用 YAML 解析器且支持 JSON；旧格式本身不是已确认故障根因。卡片导入文件仍是标准角色卡 JSON，只有初始化条目正文改为 YAML。
+- 初始化入口修订：加载器不再因 Mvu 全局存在就跳过本卡固定 MVU；由上游 `util/script.ts` 的唯一实例机制选择运行者。Schema 等待窗口内允许旧 Mvu 先于固定版本出现，避免并行脚本启动时过早报版本错误。新开场通过 MVU 自身 `initInitvar/initCheck` 自动读取世界书并保存，不发聊天消息，不用界面默认值冒充状态。
+- 本地 `@types/iframe/exported.mvu.d.ts:57` 留着旧拼写 `mag_variable_initiailized`；固定 MVU 源码 `variable_def.ts:177`、缓存 bundle 与固定 StageDog 注册源码均使用 `mag_variable_initialized`。保留按固定实现校验的版本门，不因旧声明删除检查；未覆盖用户类型文件。Vite 的 schema 库入口确实是 `src/mvu/register.ts`，不是未被引用的孤立模块。
+- R2 世界书名 `DLNM-P1-香气链路-世界书-R2`，保留旧书，避免同名旧条目/已初始化书名混淆；卡名、条目 ID、正则 ID、两项脚本 ID 保持。宿主 `world-info.js:5480` 转换条目 comment，`importEmbeddedWorldInfo` 导入后才链接，因此内嵌书存在不等于已链接。
+- 实际用户消息 0 未初始化的唯一宿主原因仍未取得运行证据：修订覆盖启动跳过、旧版本先出现、旧世界书混用这些源码路径，不声称 YAML 替换已经证明故障消失。即时诊断显示未绑定/旧书/空条目/初始化标记；15 秒结束后明确“自动初始化未完成”，不永久称“正在等待”，不让用户补发消息来触发初始化。
+- 回归源码补充：`scripts/check-card.ts` 的 YAML 字段与 R2 书名；`scripts/check-nvl.ts` 的 Fullscreen API / CSS 标记 / 启动入口静态守卫。均未执行，静态守卫也不代替实际 Fullscreen、初始化与手机验收。
+- Library：`sillytavern-api-reference` / `sillytavern-embedded-ui` / `sillytavern-card-pipeline`；读取 A0、C1、D1 和工具适配合同，快照 `2026-08-18`；候选设计未采用。
+
+#### R2 成品与下一道门
+
+- 构建：`npm.cmd run build` 首次沙箱内 `spawn EPERM` 退出 1；同命令经执行许可后退出 0。只执行两次 Vite 编译与 `npm run pack`，没有串联测试。
+- 导入卡：[dlnm-mvu-p2-dev-05676741617c.json](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-05676741617c.json)，30,019 字节；SHA256 `05676741617c21284d444469ec1670de056bd79f1cbfbc29367ad5bfac9ac59e`。回读卡版本 `p2-nvl-r2`、世界书名带 `-R2`、初值正文为 YAML。
+- 说明：[dlnm-mvu-p2-dev-05676741617c.md](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-05676741617c.md)，7,743 字节；SHA256 `493f60966dc0039cb74eea88031202216c4aced4097151511ee705e0ac5c2627`。
+- 成品：[dlnm-mvu-p2-dev-05676741617c.zip](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-05676741617c.zip)，110,911 字节；SHA256 `9e6f711fccb0de2f5ee4811090298c14465e1033051f35febec39b6ef24bffc0`。2026-09-24 16:28（Asia/Hong_Kong）确认目标不存在后新建归档，未使用覆盖选项；目录回读包含 JSON、说明和四项资源。
+- 固定资源：[dist/p2-13dfe733d806](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-13dfe733d806)：`schema.js` 88,322、`state.js` 177,051、`state.css` 13,916、`state.html` 14,491 字节。CSS 随 HTML 封装导致 HTML/卡包增长，这是消除错误样式来源的有意取舍；原 CSS 文件仍保留用于资源检查。
+- 独立源码阅读提出的 Fullscreen 待决请求/卸载竞态已定向修订：卸载依据本卡 root 标记安排清理，旧请求迟到成功也检查代次及有无接管者，缺接管者则退出。旧 @types 拼写与固定运行实现的差异以实际固定源码裁定，不冒充运行阻断。
+- 本轮未执行测试、typecheck、lint、浏览器或真实酒馆操作，未调用模型。Vite 地址仍为 `http://127.0.0.1:5173/`；未启动服务、创建远程仓库、提交或部署。
+- 下一道门：用户保留旧卡和聊天，按说明导入 R2 并链接其独立世界书；新开场应自动出现状态，无需补发消息。点击浏览器全屏，检查完整样式、Escape、面板切换和新回复接管。三项问题均待手验，初始化实际根因尚有上述现场证据缺口，P3 保持未启动。
+
+### P2 手验回报与本次修复范围（2026-09-24）
+
+- 用户报告：[initvar] 未产生可读 MVU 状态；期望全屏 NVL，当前侵入聊天面板的布局只适合作为非全屏选项。P2 未通过，继续本阶段修复。
+- 修复计划：先沿固定版本 MVU 的初始化、存储与前端读取链定位，不靠强塞默认值掩盖故障；区分“MVU 接口出现”和“消息初值已落盘”，补足开场合同与刷新/诊断。全屏以宿主顶层独立阅读层呈现，默认不重排原 chat；保留明确选择的面板模式与返回酒馆。
+- 红线：保留真实消息、历史状态、未提交工作和旧成品；不改宿主全局配置、不自动初始化已有剧情、不运行测试/类型检查/lint/浏览器或模型调用。只做源码定向修订、构建和打包，再交用户手验。
+- 改前备份：`artifacts/p2-fix-backup-20260924-155126/`。自动检查只补充可运行源码，不执行；全屏/软键盘/状态落盘效果均保留手验门。
+
+#### 定位依据、改动和边界
+
+- 已证实的源码问题：旧 `useNvl` 等待 Mvu 全局后立即读消息，未监听 `VARIABLE_INITIALIZED`；MVU 在 `initGlobals` 发布全局之后才异步执行 `initInitvar/initCheck`，接口存在不等于消息初值已保存。初始化事件本身也在 `setChatMessages` 完成前发出。旧 UI 将这些失败和 Schema 错误全部压成一条泛化提示。
+- 另一个确定缺口：本卡 `beginBatch` 要求每轮有一个完整更新块，但旧 `first_mes` 没有该块；如果 Schema 钩子已注册，初始解析也会被标待同步。本轮只给新开场补明确空更新，不改用户已有消息。
+- `[initvar]` 的禁用提示属性本身正确：上游 `loadInitVarData` 按条目名称读取，不过滤该属性。没有把条目打开、没有复制默认状态写入旧聊天。你当前酒馆究竟处于未落盘、绑定缺失还是数据损坏，代理没有运行取证，因此不声称已经锁定唯一宿主原因。
+- 修改 `src/mvu/bridge.ts` 的共用读取入口：仅略过已知 `$internal` 元数据，继续严格校验本卡字段；缺失状态和错误字段分别提示。`src/nvl.ts` 初始化及重读后最多等 15 秒，仅读取所选消息；超时以当前角色主世界书、[initvar] 条目和初始化标记补充诊断，不改状态。
+- 全屏默认走宿主 `dialog` 顶层显示层，Vue Teleport 仅搬展示节点，原消息 iframe 保持原位；普通 div 的 ShadowRoot 隔离样式。原 chat 布局保持原样，只有用户选“面板模式”才使用旧版 CSS 托管。覆盖层跟随可见视口尺寸，提供返回、Escape 和焦点回收。
+- 清理修复：新实例取得显示权时也取消旧实例尚在等待 CSS 的全屏挂载；每实例检查挂载代次，延迟结果失效后退出，延后删除只针对本实例 dialog。未新增第三个运行脚本、依赖或平行聊天存储。
+- 上游只读依据：前序固定提交缓存 `C:/Users/18248/AppData/Local/Temp/mvu-source-183d8ade` 的 `src/function/{global/index,initvar/index,initvar/variable_init}.ts`；当前读取 bundle SHA256 为 `43e38e31c3f86734cdd38c6047d22e871a043abbc2af9116ee2c54438462db6a`，与前序记录一致。Zod 注册读取同级 `tavern-resource-f2f87def/util/mvu_zod.ts`。远程 raw 部分路径返回 404 / cache miss，GitHub 树 API 返回限流，未用新分支替换固定版本。
+- 浏览器接口依据：[MDN showModal](https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/showModal) 的顶层 modal 与退出行为；[attachShadow 支持元素](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to) 指明隔离根放在 div 而非 dialog。这些是资料依据，不是本项目运行证据。
+- 补充但未执行的回归源码：`scripts/check-card.ts` 的开场空更新合同；`scripts/check-mvu-bridge.ts` 的缺失初值、未知字段和 `$internal` 读取边界。没有运行测试、typecheck、lint、浏览器或宿主。
+
+#### R1 成品与手验门
+
+- 构建：`npm.cmd run build` 首次因沙箱 `spawn EPERM` 退出 1；经执行许可后原命令退出 0，依次编译 Schema、界面并组装卡包，没有串联测试。2026-09-24 16:05（Asia/Hong_Kong）完成新归档。
+- 导入卡：[dlnm-mvu-p2-dev-9b20281be7b2.json](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-9b20281be7b2.json)，11,498 字节；SHA256 `9b20281be7b2523fbe50a3700205e8d744ef48977f1dc64ced2ad51ca7e4e282`。
+- 手验说明：[dlnm-mvu-p2-dev-9b20281be7b2.md](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-9b20281be7b2.md)，6,876 字节；SHA256 `2659ea3f112d84e6cbf92951303da200d4f5d2d7809bcbb27e1d5158f5e2655b`。
+- 成品包：[dlnm-mvu-p2-dev-9b20281be7b2.zip](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-9b20281be7b2.zip)，100,065 字节；SHA256 `b1446f1ffb97dc24c942f467fc8d95c96a92cf2d73709ec367c4f1de6a4f0c21`。归档前确认路径不存在，未使用覆盖选项；回读目录含上述 JSON、说明和固定版本四项资源。
+- 版本资源：[dist/p2-181ecc4123b7](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-181ecc4123b7)：`schema.js` 88,170 字节、`state.js` 174,650 字节、`state.css` 13,916 字节、`state.html` 618 字节。开发资源基址仍为 `http://127.0.0.1:5173/`；旧版本资源及旧卡包保留。
+- 独立源码阅读：未发现新增阻断项；已核对异步挂载失效、ShadowRoot 宿主和焦点回收。跨文档 Teleport、真实 MVU 初始化与手机软键盘均未运行；构建和归档清单不代替这些证据。测试源码仅补充，测试、typecheck、lint、浏览器、宿主操作和模型调用均未执行。
+- 下一道门：按说明先用修订卡独立新开场检查初值（零模型调用），再确认全屏/面板/返回与草稿；保留旧卡与旧聊天。P2 等用户手验，P3 继续停留未启动。
+
+### 旧 P2 首包目标、范围和保留项（保留交付历史）
+
+- 承接已获用户接受的 P1，制作桌面与手机共用的整轮阅读、独立人物栏、输入与历史导航；先标注占位素材，后续再替换。先构建打包，再手动验收。
+- 新增 `src/NvlView.vue` 负责纯文本展示，`src/nvl.ts` 负责酒馆连接和界面会话记录；已有 `StateCard.vue` 作为入口。前端只读 MVU，复用 `readStateAt`，不新增游戏变量协议或聊天数据库。
+- 保留 19 字段、MVU 回滚、5 个世界书条目、2 个脚本与全部既有组件 ID。仅第三条显示正则变为最新深度的 NVL 入口，后续回复无需模型额外输出占位符；提示清理正则不受该深度限制。
+- 定向修改打包器与 Vite 的 CSS 产物设置，JS / CSS 同一版本目录；保持回环 Vite 地址，未建立远程仓库、开放局域网或部署。
+- 原生消息只做可恢复的 CSS 显示隐藏，不改消息隐藏标记，不删除聊天。退出阅读/换聊天/销毁时移除本实例样式与监听；旧实例交出草稿写入权。发送只走酒馆现有按钮，确认真实玩家消息文本一致后清空相同草稿，超时或失败不自动重发。
+- 草稿和滚动位置仅为当前浏览器会话 UI 记录。历史正文为纯文本，Markdown 标记暂按原文显示；分支切换、编辑和重生成仍走原生界面。长聊天一次线性读取；CSS 隐藏不是性能验证，复杂恢复和状态规则仍属 P3。
+- 写前备份：[p2-backup-20260924-143357](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/p2-backup-20260924-143357)。保留原入口、装配/内容、构建器、Vite、三份文档与两份编译资源；历史 P1 固定版本目录和 JSON / ZIP 原样保留。
+
+### 只读接入依据与未验范围
+
+- 本机公开源码：SillyTavern 1.17.0，酒馆助手 4.11.0；读取文件与源码映射，没有请求真实聊天或设置。`public/scripts/st-context.js` 的 context 提供聊天、聊天 ID、在线状态与原生停止；原生 `generate('normal')` 和 Helper `generate(config)` 是不同接口，本界面没有混用。
+- `public/script.js` 约 11046～11049 的发送按钮有原生 mutex；4316～4319 读取/清空输入框，4365～4371 创建玩家消息。界面复用按钮而非另外创建用户消息再调用生成；已有不同原生草稿时停止，不覆盖。
+- 同文件约 6976～6990 中 `deactivateSendButtons` 写 `body.dataset.generating = 'true'`，`activateSendButtons` 删除它；这是已核对的当前实现细节，搭配生成事件使用，升级后仍需复查。生成结束载荷不作消息 ID 使用，重新读取真实消息。
+- Helper `getIframeName()` 返回消息 iframe ID；`getChatMessages` 默认返回所选分支文本；状态用显式楼层读取，未复制 P1 的自动结算逻辑。MVU 结束后延后一次事件循环再读，真实事件时序未验。
+- 本轮先前用户参考图只读查看，未复制为素材；占位图由 CSS / SVG 几何形状组成，不代表正式外观。Library 路由为 `sillytavern-embedded-ui`，读取 A0、C1/C2/C3/C12、D7 相关边界，快照 2026-08-18；API 以本机源码为准。
+- 未执行：任何测试、typecheck、lint、浏览器预览、真实酒馆运行、模型调用、手机实机验证。当前回环地址只供本机使用，手机需后续明确可达资源地址；不把窄屏布局代码当成双端验收。
+
+### P2 成品与下一道门
+
+- 构建命令：`npm.cmd run build`，只运行两次 Vite 编译与打包器。首次沙箱执行遇 `spawn EPERM` 退出 1；经执行许可后同命令退出 0。Schema 87,776 字节，界面 JS 165,832 字节，CSS 13,876 字节，HTML 618 字节；构建成功不是类型检查、测试或宿主运行成功。
+- 固定版本资源：[dist/p2-ce9d5306e254](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-ce9d5306e254)。版本指纹由资源根地址与 Schema / 界面 JS / CSS 共同生成；保留旧 P1 目录。
+- 导入卡：[dlnm-mvu-p2-dev-044ac933e16b.json](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-044ac933e16b.json)，11,242 字节；SHA256 `044ac933e16b4cd750948768a398f6efa1c684adcfc4f9b34606616f5805566d`。
+- 手动使用说明：[dlnm-mvu-p2-dev-044ac933e16b.md](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-044ac933e16b.md)，5,484 字节；SHA256 `35e725c4772f91a7007ece8c20196c042ec24afde4a0bb3b7f876a3ef16405d5`。
+- 成品 ZIP：[dlnm-mvu-p2-dev-044ac933e16b.zip](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-044ac933e16b.zip)，95,619 字节；SHA256 `0e2517ce260b27f3f4226c690da973ac4f2f8b40c483f55cce332eb254de96a7`。2026-09-24 15:20（Asia/Hong_Kong）使用 PowerShell `Compress-Archive -LiteralPath` 生成，无覆盖选项；归档目录列出 JSON、说明与固定版本目录中的四项资源，共六个文件。这只证明封装内容，不是自动测试。
+- 只读交叉阅读后已修正：未连接时托管/输入的禁用门、MVU 初始化失败清理、旧实例存储权、窄桌面头部断点、短视口滚动与人物栏限高。未增加依赖、状态管理库、图片下载或新的持久蓝图。
+- 当前 Vite 服务未由代理启动，用户在项目根目录运行 `npm run dev` 后按说明手验。测试、类型检查、lint、浏览器/酒馆操作与模型调用均未执行。
+
+当前停止点：P2 成品已交付，等待用户手动验收；重点是阅读布局、原生界面返回、正文/状态对应、草稿和历史导航。手机实机、软键盘及长期聊天性能尚无运行证据，当前回环资源地址也未开放给手机。P2 获明确接受前不进入 P3。
+
+## 4.1 已验收的前序交付：局部架构整理、构建与打包
+
+以下保留 P1 当时的实现与打包证据；其“待验”已由用户后续“已验收，可继续”更新为人工接受，旧测试和宿主许可没有因此自动延续。
+
+### 2026-09-24 本轮工作合同
+
+- 只做已批准的定向合并，不建立新权威蓝图：`src/card-content.ts` 承接世界书、创作文本和卡元数据；`src/card.ts` 保留组装、正则和脚本绑定。
+- 保留 `src/mvu/*`、`StateCard.vue`、`state-entry.ts`、`@types`、`AGENTS.md`、锁文件和现有测试脚本；保留 19 字段、创作设定、MVU 回滚与组件 ID，不恢复原生变量路线。
+- `delivery.config.mjs` 集中维护 `devOrigin=http://127.0.0.1:5173`、`assetBaseUrl=http://127.0.0.1:5173/` 和允许的本机酒馆 origins。获得远程仓库后再替换资源地址。
+- `npm run dev` 只用 Vite 托管已构建的 `dist` 产物，没有源码热更新；修改源码后重新构建并导入新卡包，旧卡仍引用其原版本。`npm run build` 为两次 Vite 构建后打包；`npm run pack` 只固化已有构建产物并组装角色卡，不串联测试。
+- `scripts/build-card.ts` 生成不可覆盖的 `dist/p1-<内容hash>/schema.js`、`state.js`、`state.html`；卡 JSON 在现有酒馆助手消息 iframe 内载入固定版本的 Vite 资源 URL，保持 MVU 上游固定提交，不新增跨源 iframe。
+- 参考 `E:\PersonalAI\archived\tavern_helper_template` 时只取源码/产物分层和稳定资源地址载入思路；跳过 webpack、自动同步、CI、Pinia 双向状态写入和整套模板依赖，不覆盖冲突文件。
+
+### 本轮实际交付（2026-09-24）
+
+- 构建：项目根目录执行 `npm.cmd run build`，依次为 `vite build --mode schema`、`vite build`、`npm run pack`。首次沙箱执行因 Vite 子进程 `spawn EPERM` 退出 1；经执行许可后原命令退出 0。两份编译资源分别为 87,776 与 147,965 字节。这是构建事实，不是测试或运行通过。
+- 版本资源：[dist/p1-38431e137790](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p1-38431e137790)，版本标识 `38431e137790` 来自资源基址与两份编译脚本的 SHA256 前 12 位；含 `schema.js`、`state.js`、`state.html`，已有不同版本保留。
+- 开发卡：[dlnm-mvu-p1-dev-01627503ff8f.json](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p1-dev-01627503ff8f.json)，10,884 字节；SHA256 `01627503ff8f4aba91fac6137e83bb2d82c3d328303d36e88a3548411989db33`。
+- 使用说明：[dlnm-mvu-p1-dev-01627503ff8f.md](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p1-dev-01627503ff8f.md)，3,364 字节；SHA256 `496f18c11ad31e1d2a6be765209ae312035187c941ef4394ff349c62a3c97c58`。
+- 归档包：[dlnm-mvu-p1-dev-01627503ff8f.zip](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p1-dev-01627503ff8f.zip)，82,862 字节；SHA256 `46e5a8647e630273576943df10f67a4fff59e4aeedc0790030a0666cada54679`。2026-09-24 14:19（Asia/Hong_Kong）使用 PowerShell `Compress-Archive -LiteralPath` 归档上述 JSON、说明与固定版本资源目录，未使用覆盖选项。
+- 本轮维护文件：新增 `delivery.config.mjs`、`src/card-content.ts`；定向修改 `package.json`、`vite.config.mjs`、`src/card.ts`、`scripts/build-card.ts` 与现有三份 docs。没有迁移模板构建器或增加依赖；`src/mvu/*`、界面组件、规则、类型声明、锁文件和测试脚本保持原文件。
+- 改前备份：[architecture-backup-20260924-141149](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/architecture-backup-20260924-141149)，保留四份获准修改的源码/配置、三份文档及原三份 dist 文件。回退时只针对这些文件和本轮新增文件，保留其他未提交改动；历史成品原样留存。
+- 独立源码阅读：未发现阻断问题；卡名、世界书绑定、5 条目、3 个正则 ID、2 个脚本 ID 保持一致。此项只读对照不计为自动测试或宿主验证。
+- 明确未执行：自动测试、类型检查、lint、浏览器预览、真实酒馆导入/运行、模型调用。Vite 开发服务尚未启动；手动验收时在项目根目录执行 `npm run dev`。未创建远程仓库、提交、推送、部署或发布。
+
+### 下一道门
+
+当时已形成 JSON、说明和 ZIP 后交用户手动检查；用户随后明确接受，现已从此门进入 P2。该反馈不补造逐项宿主观测记录。
+
+<details>
+<summary>历史记录：2026-09-23 MVU Zod 回补与组件实施</summary>
+
+### 2026-09-23 本轮回补记录
+
+- 用户已明确允许仅在本项目安装并锁定 `zod`、Vue 3、TypeScript、Vite、`@vitejs/plugin-vue`、`vue-tsc`；不含全局安装或酒馆改动。
+- 依赖读取临时支线 `P0-npm-metadata` 已关闭并返回 P0：首次默认镜像查询返回 `ENOTCACHED / only-if-cached`，改用命令级官方 registry、项目内缓存并取得网络执行许可后成功；没有改用户 npm 全局设置。
+- 实装版本：Zod 4.6.5、Vue 3.5.43、TypeScript 5.9.3、Vite 8.3.0、plugin-vue 6.0.9、vue-tsc 3.3.11；`npm install` 退出 0，新增 46 个直接及传递包，版本记录在 package-lock.json。尚未以此代替类型检查与构建。
+- 已确认上游 MVU Zod 存在与本卡合同相关的差异：逐命令校验会保留同轮合法项，而本卡要求失败整轮保留起点。已补最小前后钩子回滚检查，保留 MVU 原解析器；本地夹具覆盖混合成功/失败、缺块、非法结构、数值字符串和日次倒退，真实钩子执行仍待验。
+- 当前本机酒馆入口未响应；本地组件制作继续，实际绑定、上下文拼装与运行验收仍保留真实宿主门。
+- P0 退出检查点：DESIGN 7.5 已记固定提交、JSONPatch 方言/空更新/越界样例、初始化、Schema 与世界书/正则职责；19 字段严格 Schema 25 组本地回归通过。字段/素材基线保留。上游逐项提交问题分支已确认最小回滚接入点并关闭，回到 P1；no-op/完整异常路线留 P3，宿主加载仍待验。此检查点之后才制作 P1 卡组件和构建入口。
+
+本轮本地交付：
+
+- [字段 Schema](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/mvu/schema.ts)：19 字段，初值集中一份，严格拒绝未知/缺失/非法值；颜色先校验再去重。
+- [MVU 接入](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/mvu/register.ts) 与 [边界检查/读取](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/mvu/bridge.ts)：真实注册组件调用、整轮临时回滚、只读状态宏、明确楼层/分支读取。`dlnm_sync` 仅是待同步标记，不是另一份游戏状态。
+- [卡组件](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/card.ts)：5 个世界书条目（初始化禁用、4 个提示条目常驻）、3 条仅显示/仅提示的角色正则、2 个本卡脚本；Vue 只读入口见 [StateCard.vue](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/StateCard.vue)。HTML 用 UTF-8 Base64 无损包装避免酒馆替换 `$1` 等脚本内容；只在消息 iframe 初次解析时还原，没有远程前端资源或宿主 DOM 替换。
+- 本地检查点：[dlnm-mvu-p1-dc121800542a.json](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p1-dc121800542a.json)，SHA256 `dc121800542ac8cc57468fa6a87f19df4ea64b308cf7d647b651a4913d397405`。不是发布包，两个旧工件保留。
+- 可重复命令：`npm test`（25+9+14 组）、`npm run typecheck`、`npm run build`。本机 Vite 沙箱内曾 `spawn EPERM`，相同本地构建经执行许可后退出 0；该临时构建支线已关闭。产物 schema 87.57 kB、state 147.95 kB；未额外安装 lint 工具，不声称有独立 lint 结果。
+- 实际打包 HTML 在 `127.0.0.1:8139` 的短时本地预览可见“请在酒馆消息前端中查看，MVU 尚未就绪”和读取按钮，证明 Vue 编译代码与 Base64 还原实际执行。该预览无 MVU、无远程加载，验证完已关页并停止进程。
+- 只读交叉核对发现并修复：颜色 append 指针、宏 JSON 花括号、HTML 中 `$` 的脚本破坏、日次倒退；四个输出样例现在逐个通过同一边界检查。AGENTS 哈希不变，用户 `@types/` 未修改；无新持久蓝图。
+
+当前下一步（P1 尚未满足退出条件）：
+
+1. 等真实酒馆入口可访问后，仅操作已授权专用测试卡与新独立空聊天；先停用该对象的退役脚本，再导入/链接世界书、允许本角色正则，核对两项脚本。旧聊天不自动初始化或迁移。
+2. 用户已允许仅专用测试卡加载固定提交的 MVU 与 Schema 组件；加载地址见构建脚本和 register.ts。主提交固定不等于传递 CDN 依赖全固定，注册组件内部 `zod/v4/core/+esm` 无版本；远程加载、跨 Zod 实例、实际事件顺序仍须实测，不调整全局 Blob 设置。
+3. 核对 19 初值、人工更新、同楼/分支读取及世界书实际拼装（含已校验状态宏）；只验证本卡上下文，不另发模型请求证明酒馆能生成。
+4. 已知边界留在原 P3 检查单：上游合法 no-op 残余命令可能被保守判待同步；完整成长档位/颜色生命周期、发送暂停/主动修复、历史编辑/分支/中止/保存恢复尚未实现或验收。当前仅是 P1 接入组件，别把正则/Schema 静态检查当成完整状态系统。
+5. P1 真机退出条件满足并更新 NEXT 后才进入 P2 最终前端；未推进布局、完整剧情、素材、部署或发布。
+
+新 P1 的退出条件见现有 BLUEPRINT。本轮本地源码已实现，实际组件绑定、MVU 运行和最终前端仍未验；没有新增持久权威蓝图。
+
+</details>
+
+前序纠正核对（2026-09-23，早于本轮组件实施）：
+
+- 仅更新现有三份权威文档；维护源码加退役标记，历史检查改为 `BASELINE / LEGACY`，移除旧打包器的文件写出分支。直接运行旧打包命令退出码 1，两份旧工件的哈希前后保持一致；`--check` 仍只做历史内存组装检查。
+- 43 项旧合同/字段检查、23 组旧原生状态检查、源码语法和 `git diff --check` 通过；这些结果明确不计入 MVU Zod 或最终前端验收。
+- 原酒馆测试页已不在当前浏览器会话，本次未重开或修改宿主；已导入旧卡及其原设置仍保留，未声称已在宿主禁用旧脚本。新版组件重新接入该专用卡前先停用旧探针，避免两套写入者并存。
+- 全局渲染选项保持原值；没有安装、删除聊天、密钥操作、Git 写操作或新增模型调用。
+- 独立只读核对确认三项纠正及退役标记一致；发现的两处旧 P0/P1 当前时态已修正。UTF-8、本地文档链接、六阶段/十七场景及零新增蓝图核对通过；AGENTS 哈希保持原值。
+
+<details>
+<summary>历史记录：旧 P1 原生变量探针与浏览器诊断，已停止</summary>
+
+以下内容保留当时证据，旧实施步骤、打包入口及等待门均已被本节上方的新路线取代。
+
+### 旧 P1 入口与停止点（历史）
+
+P0 退出后先更新本文件，再进入以下入口检查；本轮没有越过入口直接制作完整视觉或 P3 状态系统。
+
+1. **测试对象门：已确认。** 用户已允许专用测试卡 `DLNM-P1-香气链路` 及独立聊天，仅操作该对象；保留现有卡与聊天。导入、消息变量写入、刷新和重开已在问题中明确，正常测试消息由 P1 模型测试范围覆盖。
+2. **模型调用门：已确认指定连接。** 用户指定已连接 `NIM APIs OpenSource` 的 `z-ai/glm-5.3-flash`，表示理论可无限调用，不可用则放弃。执行仍取最小必要次数；不更换模型、不改认证、不新增付费调用路径。实际调用次数与结果另记本节，不预填成功。
+3. 两项范围满足相应操作需要后，按 BLUEPRINT 的 P1 合同制作最小消息桥接、一个状态样本与朴素检查界面；优先助手读写消息、宿主原生生成，不改用户全局配置。
+4. P1 的候选正常链路为：显式创建一条 user 消息 → 注入本卡有效状态 → 宿主正常生成 → 重读真实选中回复 → 完整且非中止后整轮结算 → 回读并刷新/重开验证。每一步先检查测试对象、上下文和能力；创建消息与生成失败分开处理，重试不重复创建输入。
+5. 真机必须分别留证：真实输入和回复、下一次生成实际收到状态、选中分支一致、重复通知无重复结算、刷新重开后恢复。静态源码和人工 JSON 夹具均不代替这些结果。
+6. P1 未通过前不进入 P2；P2 的布局选择、P4 内容反馈和 P5 最终验收仍由用户确认，不自动填为通过。
+
+入口合同保持 BLUEPRINT 原 P1：输入为本轮 P0 与获准测试对象；输出为真实输入/回复、最小状态和恢复证据；仅改最小桥接/卡片状态代码与本地测试；失败留在 P1。素材尚未选定不是绕行到 P2 的理由。
+
+### P1 当前实施边界与工具适配
+
+- 本阶段仅测试 `noa.stamina`，使用 `scope:p1-probe` 标记；不是 P3 完整状态，也不是最终故事卡。原生聊天界面暂保留，新增朴素检查面板，不提前实现 NVL 视觉。
+- 维护源码：`src/p1-state.mjs`（纯解析/计算/幂等）、`src/p1-host.js`（限定测试对象的宿主读写与面板）。本卡自己的脚本没有远程 import；助手 4.11.0 的脚本 iframe 壳含其既有远程 log.js，属已安装宿主行为，不伪称整个宿主离线。
+- 只读检查：项目根目录执行 `node scripts/check-p1.mjs`、`node --check src/p1-host.js`、`node scripts/build-p1.mjs --check`；最后一个只在内存组装与语法核对，不写输出。
+- 本地检查点打包：`node scripts/build-p1.mjs`，输入上述两个维护文件，输出仅为 `artifacts/dlnm-p1-<内容哈希前12位>.json`。文件不存在才写入；已有同名文件必须内容一致，保留每个旧工件。回读验证 JSON 与脚本内容，不自动导入、安装、发布或调用模型。
+- 实际导入与聊天保存通过酒馆自己的入口执行，由宿主管理并写入其角色/聊天数据；本项目不直接修改宿主文件，只操作获准的专用对象。卡脚本的自身 enabled 与酒馆助手的“当前角色脚本”开关分别核验，只开启本专用卡的必要执行范围。
+- 模型前置核对已观察到选中配置 `NIM APIs OpenSource`、模型 `z-ai/glm-5.3-flash`。新浏览器最初显示“无连接”，点击现有“连接”后显示“有效的”；未读取或填写密钥，尚未据此宣称真实生成成功。
+
+续接时先读取本文件和用户随后给出的测试授权，再从 P1 接续。若授权仍缺失，维持本入口；不重复 P0、不创建第二套蓝图、不自动消耗模型额度。
+
+### P1 本次实测记录（进行中）
+
+- 已通过酒馆界面导入 `artifacts/dlnm-p1-308a1bcbe20f.json`，跳过标签导入，只选中新专用测试卡和其独立开场聊天；启用该卡的角色脚本。尚未初始化状态、尚未调用模型。
+- 临时问题 `P1-script-mount`：`persistent:false`，`returnTo:P1`，状态 `blocked-confirmed/closed`，已回父步骤等待兼容性门。触发证据：当前卡角色脚本开关为开，DOM 出现 `TH-script--DLNM-P1-香气链路--dlnm-p1-scent-v1` blob iframe，但等待后父页面仍无 `#dlnm-p1-panel`，error 日志为空；原地编辑与刷新重开复现。没有扩为新蓝图。
+- 最小诊断：挂载异常补上本卡专属错误日志；测试卡身份确认后即可显示读取失败，而不是吞掉开场读取异常。修订源码再打包，仅更新本测试卡脚本。
+- 检查点修订：`artifacts/dlnm-p1-a12a8d388665.json`，20,240 字节，SHA256 `a12a8d38866565af86b45f6b7ad91ad47f7094b538c9a159ca8f51e3f799d71f`；旧工件保留。通过助手“编辑脚本”原地更新同 ID 的内容，未用会生成新 UUID 的脚本导入入口。此为调试更新，不冒充新工件整卡重导入验收。
+- 根因隔离：临时回环 HTTP 诊断页（`127.0.0.1:8139`，零外部脚本）同时运行普通 inline、隐藏 Blob module、隐藏 srcdoc module；Codex 内置浏览器实际显示 **inline PASS / blob pending / srcdoc PASS**，后续再次读取结果相同。同一脚本内容只改变 iframe 载入方式，故故障已定位为该浏览器的 Blob 框架执行层；其更底层原因未查证。已连接浏览器只有此内置浏览器。
+- 源码交叉核对：助手 `src/panel/Render.vue` 的“启用 Blob URL 渲染”（控件 `TH-render-use-blob-url`）对应 `GlobalSettings.render.use_blob_url`；`Script.vue` 将它用于所有全局/预设/角色脚本，消息前端也共用。单脚本 schema 没有同名选项。因此原测试对象许可不足以覆盖此全局设置修改，已单独询问是否临时关闭并在测试后恢复；当前尚未切换。
+- 2026-09-23 再运行 `check-p0`（43）、`check-p1`（23）、`node --check src/p1-host.js`、`build-p1 --check` 与 `git diff --check` 均成功。无新增依赖，无安装、Git 写操作、密钥操作或模型调用。
+- 当前停止门：用户答复前保留全局设置原值，不初始化消息状态、不写消息变量、不调用模型；获准后先记录原值，再临时关闭该选项，仅继续本测试卡的 P1。测试成功或失败均恢复并复核原值；指定模型不可用时按用户要求结束调用尝试，不换模型。
+- 隔离诊断页已关闭，临时 HTTP 进程已终止；酒馆专用测试页保留作续接。独立只读核对确认 P1 未虚报通过，并修正了“通过宿主 UI 保存仍会写入宿主管理数据”的表述。没有活动问题支线，返回 P1 的全局兼容设置许可门。
+
+</details>
 
 ## 5. 工作方式与资料回执
 
-- 本任务使用 Soul 三席作为同一 Agent 的三个讨论镜头；当前任务级 / Portable，不宣称跨任务自动持久，不改变权限或用户引导挡位。
-- 用户引导挡位在现有项目规则中未设置；没有为用户推断或保存新挡位。
-- 工程主路由：`orchestrate-project-blueprint`；写入前经过 `consult-tavernweave-library`。
-- Library 路由 ID：`orchestrate-project-blueprint`；快照版本 `2026-08-18`；加载 `ST-A0`，用于目标、红线、验收与最小维护原则。
-- 路由返回的文档站候选未采用：三份 Markdown 已满足本次任务，不建设文档网站，不新增依赖。
-- 目标：可恢复的设计与首版执行依据。红线：仅本次三份文档，保留规则和运行环境。验收：字段及范围一致、阶段有退出条件、证据不过度表述、链接有效、工作树改动范围正确。
+- 2026-09-24 P2 R1：Library 路由 `sillytavern-api-reference`、`sillytavern-embedded-ui`、`sillytavern-card-pipeline`，快照 `2026-08-18`；读取 A0、B1、C1、D1 与打包工具适配边界，候选目录未采用。精确初始化顺序以固定提交源码为准；用户的本轮禁测要求优先于一般检查流程。
+- 2026-09-24 按用户批准范围定向合并源码、构建配置与 DESIGN/BLUEPRINT/NEXT；写前读取 TavernWeave A0 并按“目标／红线／验收”收口：目标是局部架构整理与打包交接，红线是不续用旧测试/宿主许可、不覆盖冲突文件、不新建权威蓝图，阶段包交用户手动检查。
+- 参考模板仅采用源码/产物分层与稳定资源地址载入思路；webpack、自动同步、CI、Pinia 双向状态写入及全套依赖明确跳过。原文已备份到 `artifacts/architecture-backup-20260924-141149/docs/`，该目录只用于回滚，不是新的设计或进度权威。
+- 本轮 Library 路由为 `code-quality-workflow` 和 `sillytavern-card-pipeline`，快照 `2026-08-18`；读取 A0、A2、D1、D4 的相关入口，采用组件边界与固定版本资源交付原则。没有采用目录候选，也没有因此获得远程发布或宿主操作许可。
+
+以下为 2026-09-22～23 的历史资料回执，不代表本轮操作或当前许可：
+
+- 技术栈补充本轮仅同步现有三份权威文档，未创建脚手架、安装依赖或推进阶段。Library 路由为 `orchestrate-project-blueprint`，读取 A0，快照 `2026-08-18`；路由候选未采用。保留工作区已有 `@types/` 及其他文件。
+- 前序脑暴记录过 Soul 三席镜头；本轮走普通执行与只读核对，未触发 Soul 切换或持久设置。
+- 本轮通过偏好管理器只读查询 Codex 客户端规则，结果 unset；没有推断、写入或更改用户挡位。
+- 工程主路由：`orchestrate-project-blueprint`；写前读取 `consult-tavernweave-library` 与 A0；P0 字段/原作分层参考 `tavern-card-builder`，接口核对使用 `sillytavern-api-reference`。
+- Library 快照 `2026-08-18`，路由为上述三个工程技能；实际采用 ST-A0 的目标/红线/验收、ST-A2 的卡与脚本边界、ST-A6 的显示/提示区别、ST-B1 原生变量存储区别、ST-C10 的真实消息与草稿生命周期、ST-C1 的 iframe/事件能力区分。版本敏感结论以本机 4.11.0 源码为准，不照搬指南旧版本。
+- 路由候选未采用；没有增加 CRDT、状态库、文档站或测试框架。没有新建持久权威蓝图；临时问题支线无活动项。
+- 本轮目标是把用户三项纠正同步到既有 DESIGN/BLUEPRINT/NEXT，并停止错误路线；红线为保持数值/故事/视觉选择与独立许可门。验收为现行合同一致、旧探针不再默认输出、旧测试明确标为历史；不把本次文档修正当作产品完成。
+- 本次 Library 路由 `tavern-card-builder`，快照 `2026-08-18`；读取 A0、A3/A6 的组件职责，以及 `variable-systems.md` 的 MVU/Schema、更新模式及上下文区分。候选 Zod 文档条目仅为路由结果，没有据此确定安装版本；精确 API 和真实启用证据留待技术基线回补。
