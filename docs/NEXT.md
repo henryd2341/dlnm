@@ -6,10 +6,10 @@
 
 - 保留成果：人物字段、初始值、成长规则、原作分层与素材边界继续有效。旧 P0 的 43 项检查含已废止协议，仅作历史证据，不代表 MVU Zod 路线已通过。
 - 当前阶段：用户已接受 P1，并在 R2 之后明确反馈“变量方面已经没有问题了”。变量故障按用户反馈关闭，保留现有 MVU 初始化和保存链；这不代表完整 P3 异常恢复或全部前端已经验收。
-- 当前许可：本轮用户要求拆分任务并写入 NEXT，故只更新本文件，不实施功能、不构建新包、不安装扩展。后续实施仍遵守“不擅自测试，阶段完成先打包成品，再由用户手动验收”；自动测试、类型检查、lint、浏览器、真实酒馆、模型调用均须另有明确许可，旧许可不续用。安装、Git 写操作、部署、发布另列边界。
-- 当前产品状态：进入“前端优化＋世界书完善”的计划阶段，执行顺序见 4.0。前端仍有流式/自动刷新、纯文本显示、旧面板与占位图问题，世界书内容偏技术。R2 是现有可回退成品；本轮没有新产品交付，也不推定其余 UI 已验收。
+- 当前许可：用户在流式通过反馈后接受“发送即进入待回复页”方案，并明确“按此方案修改”；本轮只修订 A 的发送等待体验并构建阶段包，停在用户手验门。仍遵守“不擅自测试，阶段完成先打包成品，再由用户手动验收”；自动测试、类型检查、lint、浏览器、真实酒馆、模型调用均未获本轮执行许可。安装、Git 写操作、部署、发布另列边界。
+- 当前产品状态：N0/N1/N2 已实施。A-R1 `d6205cce596d` 之后，用户明确反馈“流式生成测试通过”，仅关闭该观察项；同时指出首字前仍停上一轮。已按确认方案构建 A-R2 `c0c12066f521` 发送等待修订，交付与证据见 4.0；等待本修订 W1～W5 手验，完整 A1～A8 不自动全过。N3/N4/N5 尚未实施，旧包及改前备份保留。
 - 蓝图：`single-blueprint`，深度 1，子蓝图 0，`runtimePersistentBlueprintBudget = 0`。
-- 临时问题支线：无活动项。旧浏览器/Blob 问题只保留证据；先前全局渲染选项申请停止追问，不视为当前入口，也没有得到修改许可。后续只有最终前端实际遇到相关问题时再处理。
+- 临时问题支线：发送后首字前缺少本轮反馈，现以显示层等待页修订并等待手验；没有新建蓝图。A 启动正则修复沿用；旧浏览器/Blob 问题只保留证据，先前全局渲染选项不视为本次修改入口。
 
 旧 P0 合同归档：输入为当时 DESIGN、原作对照、两张参考图路径与本机公开宿主源码；输出为机器字段、旧格式样例、来源分层及依赖/素材账目，结果见 3.3。字段、来源等成果保留，技术退出条件已由当前 BLUEPRINT 的 MVU Zod 合同取代，定向回补见第 4 节。旧 P0 当时未写宿主、创建测试聊天、调用模型或复制游戏素材。
 
@@ -102,11 +102,11 @@
 
 | 证据类别 | 当前状态 |
 | --- | --- |
-| 自动化测试 | **本轮未执行。** 现有检查源码及历史结果保留；后续计划里的验收场景均不是通过记录 |
-| 本次构建/打包 | 本轮仅写计划，没有构建或打包。R2 及更早的交付事实见第 4 节历史记录 |
-| 源码阅读 / 浏览器 | 已阅读当前前端、卡内容、Vite 配置和素材目录，并读取上游扩展文档；未运行浏览器或前端 |
+| 自动化测试 | **本轮未执行。** 补充了 NVL/显示清理/卡内容的可运行检查源码，没有运行；类型检查和 lint 同样未执行 |
+| 本次构建/打包 | 只执行项目既有 Vite 编译和卡片装配；最终成品 A 的身份与 ZIP 见 4.0，不把构建成功当宿主通过 |
+| 源码阅读 / 浏览器 | 已核对本机 ST、Helper、固定 MVU 和 DOMPurify 静态源码，以及本轮独立源码审查；未运行浏览器或前端 |
 | 真实宿主 | **代理本轮未执行。** 未安装扩展、导入图包、操作消息、改设置或调用模型 |
-| 用户 | “变量方面已经没有问题了”为最新人工反馈；只关闭该问题，不扩大为完整 P2/P3 验收 |
+| 用户 | 变量问题保持已关闭；用户已反馈 A-R1 后的流式生成通过，新增首字前等待反馈问题。A-R2 待手验，不扩大为完整 P2/P3 验收 |
 
 ## 4. 下一目标与既有交付
 
@@ -114,11 +114,11 @@
 
 **目标：**真实回复自动、连续地出现在 NVL 中；支持 Markdown 和正文染色；非全屏提供轻量人物状态栏；接入可替换图片与地点映射；世界书从技术骨架补成有事实依据的世界观和人物资料。
 
-**执行边界：**本节是待执行计划。本轮只写 NEXT，所有实施项尚未开工。保留已获用户确认的变量链、19 字段、YAML 初值、消息/分支存储和原生生成；不借优化重新设计状态系统。继续使用 Vite 开发地址，远程仓库建立后再换地址。旧成品、素材原件和冲突文件保持；不把“进入下一目标”解读为测试、安装或发布许可。
+**执行边界：**本节计划现按用户续接请求执行到成品 A；各项实施/待验状态见标题。保留已获用户确认的变量链、19 字段、YAML 初值、消息/分支存储和原生生成；不借优化重新设计状态系统。继续使用 Vite 开发地址，远程仓库建立后再换地址。旧成品、素材原件和冲突文件保持；不把实施请求解读为测试、安装或发布许可。
 
 **与原阶段的关系：**UI 工作接续 P2；本次世界书完善是用户明确前移的原 P4 内容子项，不以 P3 尚未完整验收为由搁置，但也不标记 P3/P4 整体完成。DESIGN/BLUEPRINT 中“纯文本、面板模式、尚无项目图片”等旧合同由 N0 定向同步；同步前以本节最新用户纠正为准，不另建一套蓝图。
 
-#### 已核对的起点（只读事实）
+#### 计划形成时核对的起点（实施前源码事实，非成品 A 现状）
 
 - [消息接入](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/nvl.ts) 目前订阅接收/编辑/结束事件，但没有原生流式 token 订阅；监听又绑在阅读模式 acquire/release 上。下一步要同时修复流式呈现与非流式自动收尾，别只加一个事件后保留生命周期断口。
 - [阅读组件](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/NvlView.vue) 用文本插值显示回复，头像/场景仍为 CSS/SVG 占位。现有 `visibleBody` 只删完整变量块，流式半截块也要处理。
@@ -137,14 +137,14 @@
 - C：世界观/人物世界书与前端一致的完整修订卡。
 - 每次手验未通过，停在对应小阶段修正；先打包再交用户，不在打包前擅自运行测试。N5 的原作只读整理可提前进行，但正式内容落盘仍按清单和来源边界处理。
 
-#### N0 · 锁定本轮合同与素材命名（待实施）
+#### N0 · 锁定本轮合同与素材命名（文档同步完成）
 
 - **做什么：**定向同步 DESIGN/BLUEPRINT；把“全屏 NVL＋轻前端”“自动回复”“Markdown/染色”“开发占位与正式图包”写清，保留变量已解决的结论。整理最小地点/时间段/人物图片对照表和世界书条目提纲，避免 UI 与提示各用一套名称。
 - **素材约定：**对照现有文件，确认 `living`、`hall_outside`、`rouka` 等实际画面后再确定中文地点；为日/夜图片明确 `world.period` 映射，清晨/傍晚等未有专图的时段保留明确选择，不假装已有专用素材。`world.location` 保留现有文本字段，用规范名及有限别名映射，不强行扩成新 Schema 枚举。
 - **图包命名：**同一卡片中两位主角都属于同一图包作用域；public 下各目录的 `default.png`、`smile.png` 等会重名。图包使用 `noah__default.png`、`lilicia__default.png`、`bg__living_day.png` 等唯一逻辑名；只改图包副本/映射，原始 public 文件保持原名。
 - **完成标准：**六项需求都有对应任务；记录缺图、未确定角色名/场景名，不造资料补齐；技术合同没有新增状态写入者、依赖库或部署路线。
 
-#### N1 · 流式显示与回复自动同步（待实施；对应需求 1）
+#### N1 · 流式显示与回复自动同步（已实现，成品 A 待手验；对应需求 1）
 
 - **主要范围：**[src/nvl.ts](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/nvl.ts)、[src/NvlView.vue](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/NvlView.vue)、必要的入口生命周期。
 - **先定位：**沿当前原生发送按钮追踪真实酒馆的流式/非流式事件与消息保存顺序；确认 token 载荷是完整文本还是增量、消息何时分配楼层。不要把只服务 Helper 自有生成接口的事件套到当前原生发送链，也不要把结束事件参数直接当可靠楼层号。
@@ -152,7 +152,7 @@
 - **边界：**临时文本不写聊天或 MVU；生成期间人物状态保留上一份有效值并标明同步中。未闭合的 UpdateVariable/Analyze/JSONPatch 与前端占位片段不泄露到正文；停止、异常、切聊天、换分支时丢弃过期显示任务。阅读旧消息或主动上滚时不抢回最新，不覆盖草稿；最新阅读区才按用户滚动位置决定跟随。
 - **待手验：**流式边生成边出现；非流式无需手动重读；末段/末字不丢、不重复；停止/失败保留已收正文和草稿；新楼 iframe 替换后保持阅读与全屏接管；历史回看不被新流挤走，状态最终与真实所选楼层一致。
 
-#### N2 · Markdown、v-html 与模型染色约定（待实施；依赖 N1；对应需求 2、6）
+#### N2 · Markdown、v-html 与模型染色约定（已实现，成品 A 待手验；对应需求 2、6）
 
 - **主要范围：**阅读组件、消息显示转换，以及卡内容中的“正文呈现约定”。实时与历史正文共用一条转换路径。
 - **显示管线：**剥离技术块 → 使用已核对的宿主 Markdown 能力 → HTML 清理 → `v-html`。先核对宿主现成解析器和清理器，复用可用实现；不手写 Markdown 解析器，也不未经确认增装依赖。避免再次套用本卡插入前端的显示正则；不嵌套新的 iframe/loader，不双重转义，不把渲染 HTML 写回原始回复。
@@ -161,6 +161,78 @@
 - **模型指示：**明确允许在正文少量使用 Markdown 和闭合的染色 span，给出红色/其他合法颜色的正例；不要把整段正文包成 HTML 文档。染色只影响呈现，不修改 `noa.colors`、不自动触发奖励，不在 JSONPatch 技术块里插入 HTML，原有“唯一完整更新块”合同不变。
 - **待手验：**同一条实时/历史回复格式一致；染色可见且黑底可读；闭合/未闭合标签、引用和代码块呈现正确；含脚本/事件属性的文本不执行；技术块及前端入口不混入正文。
 - **成品 A：**构建并形成新版本卡 JSON、JS/CSS/HTML、说明和 ZIP；说明列出流式、非流式、历史、停止、Markdown、染色手验步骤与未测项。用户接受后继续 N3。
+
+#### 成品 A 初次实施与交付记录（2026-09-24 18:06，后续启动手验失败，见 A-R1）
+
+- **改前备份：**[n-a-backup-20260924-174233](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/n-a-backup-20260924-174233/) 保存当时的 src、docs、scripts；R2 和其他历史产物保持。
+- **N0：**DESIGN 第 5 节与 BLUEPRINT P2 合同定向同步；实际查看 living/hall_outside/rouka 图，分别登记宅邸起居室、宅邸外观、宅邸走廊及有限别名。清晨/上午/午后用 day，夜间/深夜用 night，傍晚明确暂回退 night；城市图、配角目录身份与正式资源资格仍未确认。世界书内容提纲留在现有 DESIGN，第 N5 阶段再提取来源和制作。
+- **N1：**原生累计 token 只更新内存显示页，用宿主 requestAnimationFrame 合并；继续回复只拼一次旧前缀。按当前聊天、生成对象、消息对象和 swipe 复核，切聊天/分支及退役取消旧任务。数据显示监听与全屏/面板显示清理分开；最新入口在未打开阅读时也保持监听。生成结束不等同状态保存，人物栏保留上一份有效状态，目标 `CHARACTER_MESSAGE_RENDERED` 之后重读精确消息变量；初始化和已有 MVU 写链未修改。
+- **N1 接管/滚动：**Helper 同一楼层重绘会复用 DOM ID，故以每个实例独立对象作为显示接管令牌，旧实例先同步保存/退役，新实例再读会话记录；等待 MVU 前后核对 iframe 的 contentWindow。跟随最新的布尔值与阅读位置分别保留，换 iframe 后只有跟随模式滚到底，历史/上滚恢复原位。停止请求检查原生 boolean 返回值，不单凭 STOPPED 事件声称成功。
+- **N2：**[message-display.ts](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/message-display.ts) 统一处理实时/历史正文：剥技术块与本卡 loader，使用宿主 Showdown，独立 DOMPurify 实例白名单清理，再交 `v-html`。技术块即使错误包在围栏/行内代码中也被隐藏；普通 HTML 示例代码保持字面。只保留基本 Markdown 元素、http/https/mailto 链接、经过校验的 span color；过暗颜色作仅显示的提亮，单色缓存避免相同流式颜色反复测量。不执行角色显示正则，不新增依赖，不改宿主全局清理 hooks。
+- **卡内容：**增加第 6 条“正文呈现约定”，明确染色不改 `noa.colors` 或奖励、不进入 JSONPatch。卡版本 `p2-nvl-na`；世界书独立命名 `DLNM-P1-香气链路-世界书-NA`，保留 R2。卡名、已有条目/正则/脚本 ID、19 字段初值和固定 MVU/Schema 路径不变；已有聊天不自动迁移。
+- **草稿语义：**未发送或未确认草稿保持；只有收到相同文本的真实 `MESSAGE_SENT` 后，才清空那份已提交草稿。之后的新草稿不动，停止/失败不自动重发；已发送行动仍以真实聊天为准。
+
+**本轮只读来源证据（不是运行验收）：**
+
+- 本机 SillyTavern `aa50edcf4561301ec5ef916b247f0ec34d3ac4b9`，1.17.0：`public/script.js:3461-3818` 的累计 token/continue/最终渲染时序；`:5518-5530` 的停止返回值；`:6543-6684` 非流式写入后渲染。公开 `SillyTavern.libs` 提供 `showdown` 与 `DOMPurify`（`public/lib.js:83-120`）；`messageFormatting` 会执行角色正则，因此本卡未调用它。[上游固定源码](https://github.com/SillyTavern/SillyTavern/blob/aa50edcf4561301ec5ef916b247f0ec34d3ac4b9/public/script.js#L3461-L3818)。
+- Helper 4.11.0 `fe6388985ffb8a3d9ac08d09b9dfb28423a5fc2b`：`src/function/variables.ts:56-125` 的显式消息读取只取指定楼层/当前 swipe，不继承前楼；iframe 默认合并视图与此不同。[固定源码](https://github.com/N0VI028/JS-Slash-Runner/blob/fe6388985ffb8a3d9ac08d09b9dfb28423a5fc2b/src/function/variables.ts#L56-L125)。
+- 固定 MVU `183d8ade` 的 `update_variables.ts:1614-1725` 先发计算结束事件，再更新消息变量，最后 `refresh:'affected'` 触发目标渲染。代码只在真实数据回读后更新显示；可回读不证明磁盘防抖保存已经耐久完成。[固定源码](https://github.com/MagicalAstrogy/MagVarUpdate/blob/183d8ade3b9a3369e824a55cb13b4ddf91aada50/src/function/update_variables.ts#L1614-L1725)。
+- 独立只读源码核对提出并已修正：同楼 iframe ID 重用导致双监听、技术代码围栏泄漏、跟随标志未跨实例传入导致末段停在上方、停止返回 false 的提示，以及普通链接默认导航走酒馆/消息 iframe。合法链接在净化阶段固定为新标签与 `noopener noreferrer`。最终只读回读未报告剩余高价值源码问题；源码审查通过不标为动态场景通过。
+
+**最终交付：**
+
+| 文件 | 大小 | SHA256 |
+| --- | --- | --- |
+| [导入卡 JSON](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-4b9dfe1807c9.json) | 32,581 字节 | `4b9dfe1807c93f8e43be0f7c0c1fb10677ed173367e89afe426a09a1821fcb76` |
+| [导入与 A1～A8 手验说明](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-4b9dfe1807c9.md) | 7,813 字节 | `5505fe22021f3c676e09d28cdddf42e034b72f27c6b9da0a31907cc028e20237f` |
+| [成品 A ZIP](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-4b9dfe1807c9.zip) | 115,714 字节 | `9ebc868ef96776634b2a7234099f27e4d79b6812789589c2f32c2d34f3252aec` |
+
+- 固定资源目录：[dist/p2-033c3a4c92a3](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-033c3a4c92a3/)：schema.js 88,322、state.js 185,666、state.css 14,946、state.html 15,521 字节。ZIP 目录回读含 JSON、说明及这四项资源；JSON 回读确认 6 世界书条目、3 正则、2 脚本及 NA 书名。
+- 构建命令 `npm.cmd run build`：首次沙箱内 `spawn EPERM` 退出 1；经工具执行许可后同命令成功，源码修正后最终再次构建退出 0。只有 Vite 两次编译和现有 pack 装配，没有串联测试。中间构建的 `5cebec834d9a`、`9833bc47b3cc`、`af2acf9476d1` 包只作本轮过程产物，不是当前交付。
+- 归档前确认新路径不存在，未使用覆盖选项。未启动 Vite、未导入宿主、未安装扩展、未调用模型、未做 Git 写操作或部署。自动测试、typecheck、lint、浏览器与真实手机均未执行；检查源码仅补充未运行。
+- **当时下一道门：**用户手验 A1～A8；随后在启动入口失败，转下方 A-R1 修订。当前旧面板与几何占位是分阶段保留，非 N3/N4 已实现；P3/P4/P5 整体验收继续开放。
+
+#### A-R1 · 修复“正在加载”停住（2026-09-24 18:21；后续用户反馈流式通过，见 A-R2）
+
+- **用户证据：**最新截图显示开场白下已出现加载占位；用户确认世界书、助手脚本、角色正则已导入。随后 Console 给出 `Invalid regular expression ... Unmatched ')'`，与 `src/message-display.ts:20` 的 `RAW_CARD_LOADER` 及旧固定 state.js 完全对应。
+- **原因与修正：**从上一条含前瞻的正则复制代码时，多保留了一个裸 `)`。这是前端 JS 自身的语法错误，不是酒馆角色正则导入错误；浏览器解析整个脚本失败，尚未执行 Vue 挂载。只删掉该多余字符，保留上一行前瞻的闭括号；未调整 document.write、Helper、入口时序、世界书内容、MVU 链或宿主设置。
+- **范围与备份：**本次修改 `src/message-display.ts`、`scripts/check-message-display.ts`、`scripts/build-card.ts` 的交付说明与本 NEXT；备份为 [n-a-startup-fix-backup-20260924-181842](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/n-a-startup-fix-backup-20260924-181842/)。检查源码新增未包围栏的完整/截断 loader 两例，未运行。
+- **源码与构建证据：**独立只读核对确认多余括号进入旧 bundle；本机静态资源 GET 为 200，仅证明可取回文件。修正后 `npm.cmd run build` 沙箱内因 `spawn EPERM` 退出 1，经工具许可重试退出 0；仅执行现有 Vite 两次编译与 pack，未串联测试。新 state.js 回读显示修正后的正则，大小 185,665 字节，比旧版少 1 字节；构建通过仍不标记浏览器通过。
+- **路由/工具边界：**沿用 NEXT 的完整阶段卡包交付；TW `sillytavern-card-pipeline` 路由快照 2026-08-18，A0/A2/D1/D4。既有 package.json、Vite 与 build-card 源码确认输出只到 dist/artifacts，固定版本碰撞时停止；ZIP 先确认新路径不存在，再创建并回读目录，不覆盖旧包。未执行测试、typecheck、lint、浏览器、真实酒馆或模型调用；没有新依赖、Git 写操作、安装或部署。
+
+| 当前修订交付 | 大小 | SHA256 |
+| --- | --- | --- |
+| [A-R1 导入卡 JSON](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-d6205cce596d.json) | 32,581 字节 | `d6205cce596d8ad95bed7005aee179f29aae64380adde25fc8834507801587a1` |
+| [A-R1 说明](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-d6205cce596d.md) | 8,662 字节 | `1ffceb5260a5ca1df3851a32b3eb140a53b1381cd03736e7b8f44d3b99451ed2` |
+| [A-R1 完整 ZIP](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-d6205cce596d.zip) | 116,117 字节 | `b72b82145c12a2e01ed1b797bebca47205d8c9b6b539c2c1181a026b2e6f47ca` |
+
+- **固定资源：**[dist/p2-02bad7aab8ac](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-02bad7aab8ac/)；schema.js 88,322、state.js 185,665、state.css 14,946、state.html 15,521 字节。ZIP 含这四项、JSON 与说明。卡版本仍 `p2-nvl-na`、世界书仍 NA；以文件名哈希识别修订。
+- **下一道门：**在专用副本导入 A-R1 JSON，已有 NA 世界书直接链接，无需再次导入相同世界书或安装助手。Vite 继续使用当前项目 dist；旧卡仍指向旧固定 JS，单独刷新旧卡不会切换修订。先在新卡最新消息确认阅读入口出现，无需发消息或调用模型；启动通过后继续 A1～A8。用户接受成品 A 后再进入 N3。
+
+#### A-R2 · 发送后立即显示本轮与等待反馈（2026-09-24 19:19，待用户手验）
+
+- **用户反馈与确认：**用户明确“流式生成测试通过”，但发送后要等 AI 响应才进入新一轮，延迟高时像卡住。方案已说明并获“按此方案修改”：点击后立即显示本轮；真实消息确认后计时；首字在同页继续；停止/失败保留；临时显示不写真实聊天或 MVU。此标签是成品 A 的第二次修订，不指旧 P2-R2 `05676741617c`。
+- **已实施：**[src/nvl.ts](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/nvl.ts) 保持真实助手页与既有 token 合帧路径，另派生一张只用于显示的 `-2` 待回复页。点击先保存显示状态，再触发同一原生发送按钮；`MESSAGE_SENT` 后绑定真实 userId/实际文本，文本一致才清相同草稿。等待前置状态、确认起点与停止状态跟随既有会话记录交接；不建立第二套聊天存档或生成队列。
+- **同页交接：**等待页与用户消息后的第一条助手回复共用 `turn:userId:swipe` 阅读位置键；同用户后续助手页用真实消息 ID，避免串位置。首个可见正文到来才转为真实回复；原生 `...` 空占位不算正文。等候时回看历史保持当前位置，返回最新仍可见待回复或正文；旧 A-R1 阅读位置采用已有键作回读兼容。
+- **失败与重生成：**等待计时从实际接收确认开始，不猜测进度百分比。15 秒仍未确认仅提示核对并保留草稿；生成结束后延迟回读，停止事件可升级停止提示；没有自动重发。重生成保留原轮与标明的旧正文、预设新 swipe 0 的位置键，续写沿原页；同条真实用户消息被后续扩展规范化时同步显示实际文本而非丢掉等待页。
+- **界面与边界：**[src/NvlView.vue](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/src/NvlView.vue) 增加发送/等待秒数/停止/未确认/尚无正文提示、明确的历史与待回复项；秒表只在显示等待页时运行，离开或卸载即清理。负编号在人物读取、初始化诊断和 MVU 等待前被隔离；人物数据继续使用已保存快照。世界书、变量 19 字段、Schema/bridge/register、依赖、外观布局与图片路线均未修改，N3/N4/N5 保持待实施。
+- **改前备份：**[n-a-waiting-backup-20260924-185930](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/n-a-waiting-backup-20260924-185930/)。本次落盘范围仅上述两个产品文件、[scripts/check-nvl.ts](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/scripts/check-nvl.ts)、[scripts/build-card.ts](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/scripts/build-card.ts) 的交付说明与本 NEXT。检查源码补充发送/确认/原生空占位、会话 JSON 回读、终态、首字位置键、重生成位置键与无宿主写操作护栏；全部未运行。
+
+**证据与未验项：**
+
+- 本机公开 `SillyTavern/public/script.js:4215-4238,4315-4371,5785-5830` 确认 `GENERATION_AFTER_COMMANDS` 早于真实用户消息与 `MESSAGE_SENT`，且确认文本已过用户正则/宏；`:3489,3542-3556,3780-3783,6643-6685` 确认流式 `...` 创建和最终消息事件分离；`:3453-3458,3715-3722,5518-5530` 确认 ENDED 可早于最终渲染及 STOPPED。只读源码证据不等于宿主动态通过。
+- 独立只读核对已完成，发现并修正同一用户消息后置改写丢等待态、非零 swipe 重生成改键、历史数量语义三处边界；最后回读未发现新的功能缺陷。只执行源码阅读，没有由代理执行动态场景。
+- TW 路由快照 2026-08-18：embedded-ui（A0/C1/C2/D7）与 card-pipeline（既有 A2/D1 工件合同），无新增设计候选或依赖。项目 package.json/Vite/build-card 源码确认构建只编译两次并装配 dist/artifacts；固定版本文件存在且内容不同即停止。
+- `npm.cmd run build` 沙箱内首次 `spawn EPERM` 退出 1；工具许可后成功。源码核对修正后最终再次构建退出 0。`5c87e7119bf9` 为过程包，不是当前交付。没有执行自动测试、typecheck、lint、浏览器、真实酒馆或模型调用，也没有安装、Git 写操作、部署或发布。用户此前流式通过仅属于前一包，不把本修订自动标为通过。
+
+| 当前交付 | 大小 | SHA256 |
+| --- | --- | --- |
+| [A-R2 导入卡 JSON](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-c0c12066f521.json) | 32,929 字节 | `c0c12066f5215adeb744b68464e23c7cbd0f74bc0e33c0f00fc48080e9d27d0e` |
+| [A-R2 说明与 W1～W5 手验](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-c0c12066f521.md) | 11,300 字节 | `8717a4ac80fa31e5b6571ae20dd3564b9f16f12423a9bc5257b61931cbc075c4` |
+| [A-R2 完整 ZIP](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-c0c12066f521.zip) | 119,331 字节 | `fe624698f02fad08db40c3d3301f7fd4b8f0ea6ec14441e6e51261c1162bfecc` |
+
+- 固定目录：[dist/p2-a66103ffbf30](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-a66103ffbf30/)：schema.js 88,322、state.js 191,727、state.css 15,208、state.html 15,783 字节。归档前确认新路径不存在；ZIP 目录回读含四项资源及 JSON/说明。卡 JSON 回读仍为 `p2-nvl-na`、NA 世界书、6 条目/3 正则/2 脚本；以文件名哈希识别修订。Schema bundle SHA256 仍为 `c327c1c860035c68cd190525e8f0bcd466d43036190fd658b9b8e30f0b8b1fbf`。
+- **下一道门：**保留原卡，在专用副本导入本次 JSON，继续链接已有 NA 世界书并保持 Vite。先看 W1 点击即进入本轮、确认后等待秒数、首字同页接续，再看 W2～W5 历史/停止/非流式与实例交接/重生成续写。旧卡引用旧固定 JS，刷新旧卡不会切换版本；A 整体接受后再进入 N3。
 
 #### N3 · 删除旧面板，非全屏改为轻前端（待实施；依赖成品 A；对应需求 3）
 
@@ -193,9 +265,9 @@
 
 #### 续接入口与资料回执
 
-- **下一步从 N0 开始。** 先读本节与后续用户反馈；变量问题已经用户确认，不回到 R1/R2 的初始化故障排查。执行时逐项更新状态，完成一个成品门即打包交手验。
-- 本轮仅修改 NEXT：源码、DESIGN、BLUEPRINT、public、历史成品及宿主均未改动；没有测试、构建、安装或运行验收。
-- 已读技能：`consult-tavernweave-library`、`sillytavern-embedded-ui`、`tavern-card-builder` 及 material-provenance；Library 快照 `2026-08-18`，采用 A0 目标/红线/验收、A3 世界书组织、A5 渲染管线、C1 iframe 边界，没有采用目录候选。
+- **下一步是成品 A 用户手验。** 反馈未通过时只修对应 N1/N2；明确接受后从 N3 继续。变量问题已经用户确认，不回到 R1/R2 初始化故障排查；不跳过 A 门实施 B/C。
+- 本轮改动：DESIGN/BLUEPRINT 的 N0 合同、NVL 数据与显示生命周期、正文转换、正文世界书条目及打包说明/检查源码；AGENTS、Schema/bridge/register、依赖及锁文件、原始 public、历史版本目录和宿主均保持原样。构建只更新 dist 顶层输出并新增固定版本与卡包，不覆盖旧版本文件。
+- 本轮技能：`consult-tavernweave-library`、`sillytavern-embedded-ui`、`sillytavern-api-reference`、`sillytavern-card-pipeline`、Ponytail。Library 快照 `2026-08-18`，读取 A0、C1/C2/C3、A2/D1 相关片段及打包工具适配合同；未采用目录候选、未新增依赖或工具层。N5 的 A3/原作事实提取仍待其阶段实施。
 - 扩展资料只作接入依据：2026-09-24 只读核对 [官方 README](https://github.com/pokerface-1224/Illustration-Gremlin/blob/222150201c9cd3ab48435fc9b9221ed699d79e24/README.md) 与 [API.md](https://github.com/pokerface-1224/Illustration-Gremlin/blob/222150201c9cd3ab48435fc9b9221ed699d79e24/API.md)，提交 `222150201c9cd3ab48435fc9b9221ed699d79e24`。图包导入展平目录、同名自动编号；前端 API 限当前角色，列图/精确路径/缓存与 URL 生命周期需按用户实际安装版本再核对。本轮没有安装该扩展，也没有图包实测。
 
 ### 以下为 R2 及此前交付历史

@@ -3,15 +3,15 @@ import NvlView from './NvlView.vue';
 import { useNvl } from './nvl.ts';
 
 const { pages, selectedId, snapshot, stateMessageId, draft, busy, connected, canSend, error,
-  chatKey, hosted, opening, mode, surfaceTarget, select, send, stop, refresh, toggleHost } = useNvl();
+  chatKey, hosted, opening, mode, surfaceTarget, following, select, follow, send, stop, refresh, toggleHost } = useNvl();
 </script>
 
 <template>
   <Teleport :to="surfaceTarget || 'body'" :disabled="!surfaceTarget">
   <NvlView v-if="hosted" v-model:draft="draft"
-    :pages="pages" :selected-id="selectedId" :snapshot="snapshot" :state-message-id="stateMessageId"
+    :pages="pages" :selected-id="selectedId" :snapshot="snapshot" :state-message-id="stateMessageId" :following="following"
     :busy="busy" :connected="connected" :can-send="canSend" :error="error" :chat-key="chatKey" :hosted="hosted" :mode="mode"
-    @select="select" @send="send" @stop="stop" @refresh="refresh" @toggle-host="toggleHost()"
+    @select="select" @follow="follow" @send="send" @stop="stop" @refresh="refresh" @toggle-host="toggleHost()"
     @change-mode="toggleHost($event)" />
   </Teleport>
   <section v-if="!hosted" class="nvl-entry" aria-label="NVL 阅读入口">

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import type { State } from './mvu/schema.ts';
 import type { NvlPage } from './nvl.ts';
+import { createMessageRenderer } from './message-display.ts';
 
 const props = defineProps<{
   pages: NvlPage[];
   selectedId: number;
+  following: boolean;
   snapshot: State | null;
   stateMessageId: number | null;
   draft: string;
@@ -21,6 +23,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:draft': [value: string];
   select: [id: number];
+  follow: [value: boolean];
   send: [];
   stop: [];
   refresh: [];
@@ -31,14 +34,36 @@ const emit = defineEmits<{
 const reading = ref<HTMLElement | null>(null);
 const composing = ref(false);
 const positions = new Map<string, number>();
+const renderMessage = shallowRef<((text: string) => string) | null>(null);
+const rendererError = ref('');
+const now = ref(Date.now());
+let waitingClock: ReturnType<typeof setInterval> | undefined;
+let scrollRevision = 0;
 
 const selectedIndex = computed(() => props.pages.findIndex(page => page.id === props.selectedId));
 const selectedPage = computed(() => selectedIndex.value < 0 ? null : props.pages[selectedIndex.value]);
 const latestPage = computed(() => props.pages[props.pages.length - 1] ?? null);
 const positionKey = computed(() => selectedPage.value
-  ? `${props.chatKey}:${selectedPage.value.id}:${selectedPage.value.swipe}`
+  ? `${props.chatKey}:${selectedPage.value.viewKey ?? `${selectedPage.value.id}:${selectedPage.value.swipe}`}`
   : `${props.chatKey}:empty`);
+const waiting = computed(() => selectedPage.value?.waiting);
+const waitingLabel = computed(() => {
+  const value = waiting.value;
+  if (!value) return '';
+  if (value.phase === 'sending') return '正在发送…';
+  if (value.phase === 'waiting') return value.replyId === undefined ? '已发送，等待回复…' : '正在重新生成，等待回复…';
+  if (value.phase === 'stopped') return value.userId === null && value.replyId === undefined
+    ? '生成已停止，发送仍未确认；草稿保留，请返回酒馆核对。' : '生成已停止；已发送内容与已有回复保留。';
+  if (value.phase === 'unconfirmed') return '发送尚未确认，草稿已保留；请返回酒馆核对，不会自动重发。';
+  return '生成已结束，但尚未收到正文；请返回酒馆核对错误提示，不会自动重发。';
+});
+const waitingSeconds = computed(() => waiting.value ? Math.max(0, Math.floor(((waiting.value.endedAt ?? now.value) - waiting.value.startedAt) / 1000)) : 0);
 const sendDisabled = computed(() => props.busy || !props.canSend || !props.draft.trim());
+const renderedBody = computed(() => {
+  if (!renderMessage.value) return { html: '', error: rendererError.value || '正文格式组件尚未就绪，暂显示原文。' };
+  try { return { html: renderMessage.value(selectedPage.value?.text ?? ''), error: '' }; }
+  catch { return { html: '', error: '正文格式转换失败，原文保留；请检查宿主 Markdown 与清理组件。' }; }
+});
 
 const traitGroups = computed(() => props.snapshot ? [
   {
@@ -75,7 +100,11 @@ function storageKey(key: string) {
 function readPosition(key: string) {
   if (positions.has(key)) return positions.get(key) ?? 0;
   try {
-    const stored = sessionStorage.getItem(storageKey(key));
+    let stored = sessionStorage.getItem(storageKey(key));
+    // Reuse A-R1 scroll positions when a real page first adopts a stable turn key.
+    if (stored === null && selectedPage.value && selectedPage.value.id >= 0) {
+      stored = sessionStorage.getItem(storageKey(`${props.chatKey}:${selectedPage.value.id}:${selectedPage.value.swipe}`));
+    }
     const value = stored === null ? 0 : Number(stored);
     return Number.isFinite(value) && value >= 0 ? value : 0;
   } catch {
@@ -93,9 +122,16 @@ function savePosition(key = positionKey.value) {
     // Memory remains authoritative for this mounted view when storage is unavailable.
   }
 }
+function onScroll() {
+  scrollRevision++;
+  savePosition();
+  const element = reading.value;
+  if (element) emit('follow', selectedPage.value?.id === latestPage.value?.id && element.scrollHeight - element.clientHeight - element.scrollTop < 80);
+}
 
 function restorePosition(key: string) {
-  if (reading.value) reading.value.scrollTop = readPosition(key);
+  if (reading.value) reading.value.scrollTop = props.following && selectedPage.value?.id === latestPage.value?.id
+    ? reading.value.scrollHeight : readPosition(key);
 }
 
 function selectRelative(offset: number) {
@@ -129,9 +165,25 @@ watch(positionKey, (next, previous) => {
   savePosition(previous);
   nextTick(() => { if (positionKey.value === next) restorePosition(next); });
 }, { flush: 'pre' });
+watch(() => waiting.value?.phase, phase => {
+  clearInterval(waitingClock); now.value = Date.now();
+  if (phase === 'waiting') waitingClock = setInterval(() => { now.value = Date.now(); }, 1000);
+}, { immediate: true });
+watch(() => selectedPage.value?.text, () => {
+  const element = reading.value, key = positionKey.value, revision = scrollRevision;
+  if (!element || !props.following || selectedPage.value?.id !== latestPage.value?.id || element.scrollHeight - element.clientHeight - element.scrollTop >= 80) return;
+  void nextTick(() => {
+    if (reading.value === element && key === positionKey.value && revision === scrollRevision) element.scrollTop = element.scrollHeight;
+  });
+}, { flush: 'pre' });
 
-onMounted(() => restorePosition(positionKey.value));
-onBeforeUnmount(() => savePosition());
+onMounted(() => {
+  try { renderMessage.value = createMessageRenderer(window.parent); }
+  catch (cause) { rendererError.value = cause instanceof Error ? cause.message : '宿主正文组件不可用，暂显示原文。'; }
+  const revision = scrollRevision;
+  void nextTick(() => { if (revision === scrollRevision) restorePosition(positionKey.value); });
+});
+onBeforeUnmount(() => { savePosition(); clearInterval(waitingClock); });
 </script>
 
 <template>
@@ -213,7 +265,7 @@ onBeforeUnmount(() => savePosition());
       </details>
 
       <section class="reader-column" aria-label="当前阅读内容">
-        <div ref="reading" class="reading-scroll" tabindex="0" @scroll.passive="savePosition()">
+        <div ref="reading" class="reading-scroll" tabindex="0" @scroll.passive="onScroll">
           <div class="scene-placeholder" aria-label="宅邸与月光城市场景占位">
             <svg viewBox="0 0 1000 620" aria-hidden="true">
               <path d="M0 0h1000v620H0z" fill="#151515" />
@@ -233,9 +285,19 @@ onBeforeUnmount(() => savePosition());
             <section class="reply-block" aria-label="本轮回复">
               <div class="reply-heading">
                 <span>{{ selectedPage.name || '回复' }}</span>
-                <small>消息 {{ selectedPage.id }} · 分支 {{ selectedPage.swipe + 1 }}</small>
+                <small v-if="waiting">{{ waiting.replyId === undefined ? '本轮待回复' : '本轮重新生成' }}</small>
+                <small v-else>消息 {{ selectedPage.id }} · 分支 {{ selectedPage.swipe + 1 }}</small>
               </div>
-              <p>{{ selectedPage.text }}</p>
+              <div v-if="waiting" class="waiting-reply">
+                <p role="status">{{ waitingLabel }}</p>
+                <small v-if="waiting.phase === 'waiting'">已等待 {{ waitingSeconds }} 秒</small>
+                <small v-if="waiting.previousText">以下保留重生成前的正文，尚非新回复。</small>
+              </div>
+              <template v-if="!waiting || selectedPage.text">
+                <p v-if="renderedBody.error" class="format-error" role="status">{{ renderedBody.error }}</p>
+                <p v-if="renderedBody.error" class="plain-reply">{{ selectedPage.text }}</p>
+                <div v-else class="reply-markdown" v-html="renderedBody.html"></div>
+              </template>
             </section>
           </article>
           <div v-else class="empty-reader" role="status">
@@ -247,7 +309,7 @@ onBeforeUnmount(() => savePosition());
         <nav class="reading-nav" aria-label="回复阅读导航">
           <button type="button" :disabled="selectedIndex <= 0" @click="selectRelative(-1)">← 前一轮</button>
           <details class="history-menu">
-            <summary>历史 {{ pages.length }}</summary>
+            <summary>历史 {{ pages.filter(page => !page.waiting).length }}<span v-if="pages.some(page => page.waiting)"> · 本轮待回复</span></summary>
             <ol>
               <li v-for="page in pages" :key="`${page.id}:${page.swipe}`">
                 <button
@@ -255,7 +317,8 @@ onBeforeUnmount(() => savePosition());
                   :aria-current="page.id === selectedId ? 'page' : undefined"
                   @click="emit('select', page.id)"
                 >
-                  <span>消息 {{ page.id }} · 分支 {{ page.swipe + 1 }}</span>
+                  <span v-if="page.waiting">{{ page.waiting.replyId === undefined ? '本轮待回复' : '本轮重新生成' }}</span>
+                  <span v-else>消息 {{ page.id }} · 分支 {{ page.swipe + 1 }}</span>
                   <small>{{ page.prompt || '无用户输入摘要' }}</small>
                 </button>
               </li>
@@ -431,7 +494,22 @@ textarea:focus-visible,
 .reply-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1.3rem; padding-bottom: .65rem; border-bottom: 1px solid #555; }
 .reply-heading span { letter-spacing: .16em; }
 .reply-heading small { color: var(--muted); }
-.reply-block > p { margin: 0; color: var(--paper); font-size: clamp(1rem, 1.4vw, 1.16rem); white-space: pre-wrap; text-shadow: 0 1px 2px #000; }
+.reply-markdown, .plain-reply { margin: 0; color: var(--paper); font-size: clamp(1rem, 1.4vw, 1.16rem); text-shadow: 0 1px 2px #000; }
+.plain-reply { white-space: pre-wrap; }
+.format-error { color: #f1d6d2; font-size: .85rem; }
+.waiting-reply { min-height: 5rem; padding: .8rem 0; color: var(--paper); overflow-wrap: anywhere; }
+.waiting-reply p { margin: 0 0 .5rem; }
+.waiting-reply small { display: block; color: var(--muted); font-variant-numeric: tabular-nums; }
+.reply-markdown :deep(p) { margin: 0 0 1em; }
+.reply-markdown :deep(:last-child) { margin-bottom: 0; }
+.reply-markdown :deep(ul), .reply-markdown :deep(ol) { padding-left: 1.5em; }
+.reply-markdown :deep(blockquote) { margin: 1em 0; padding: .3em 1em; border-left: 3px solid #999; color: #ccc9c3; }
+.reply-markdown :deep(pre) { max-width: 100%; overflow-x: auto; padding: .8em; border: 1px solid #555; background: #151515; white-space: pre; }
+.reply-markdown :deep(code) { font: .9em/1.6 Consolas, monospace; background: #252525; border-radius: 2px; }
+.reply-markdown :deep(pre code) { background: none; }
+.reply-markdown :deep(a) { color: #9bc7ff; text-decoration: underline; overflow-wrap: anywhere; }
+.reply-markdown :deep(a:focus-visible) { outline: 2px solid currentColor; outline-offset: 3px; }
+.reply-markdown :deep(span[style]) { text-shadow: 0 1px 2px #000; }
 .empty-reader { min-height: 100%; display: grid; place-content: center; gap: .5rem; padding: 2rem; text-align: center; background: #101010; }
 .empty-reader span { color: var(--muted); }
 
@@ -499,7 +577,7 @@ footer { padding: .25rem max(.7rem, env(safe-area-inset-right)) max(.25rem, env(
   .character-list { grid-template-columns: 1fr; overflow-x: visible; }
   .character-card { min-width: 0; grid-template-columns: 70px minmax(0, 1fr); }
   .portrait { height: 102px; }
-  .reply-block > p { font-size: 1rem; }
+  .reply-markdown, .plain-reply { font-size: 1rem; }
   .reading-nav > button { padding-inline: .65rem; }
   .composer { grid-template-columns: minmax(0, 1fr) 96px; }
   .composer-actions { min-width: 0; }

@@ -50,12 +50,12 @@ check('initvar is disabled YAML generated from the shared initial state', () => 
         : `  ${name}: ${JSON.stringify(value)}`));
     }
   }
-  assert.equal(book.name, 'DLNM-P1-香气链路-世界书-R2');
+  assert.equal(book.name, 'DLNM-P1-香气链路-世界书-NA');
 });
 
 check('all prompt entries are explicit constant blue lights', () => {
   const promptEntries = book.entries.filter(item => item.enabled);
-  assert.equal(promptEntries.length, 4);
+  assert.equal(promptEntries.length, 5);
   for (const item of promptEntries) {
     assert.equal(item.constant, true);
     assert.equal(item.selective, false);
@@ -105,6 +105,13 @@ check('output contract includes empty, delta, replace and insert JSONPatch examp
 });
 
 check('first message contains the frontend placeholder', () => assert.match(data.first_mes, /<StatusPlaceHolderImpl\/>/));
+check('body presentation is separate from game colors and technical output', () => {
+  const content = book.entries.find(item => item.comment.includes('正文呈现'))!.content;
+  assert.match(content, /<span style="color: red">/);
+  assert.match(content, /不修改 noa.colors/);
+  assert.match(content, /不在技术块中插入 HTML/);
+  assert.equal(data.character_version, 'p2-nvl-na');
+});
 check('greeting declares a valid empty MVU update instead of being marked pending', () => {
   assert.equal(beginBatch({ stat_data: structuredClone(initialState) }, [], data.first_mes).error, '');
 });
