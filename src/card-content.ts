@@ -37,7 +37,7 @@ export function createCardContent() {
     scenario: '续篇第 1 日上午，宅邸起居室。两人共同生活，莉莉希雅提出寻找共用香气的邀请。',
     first_mes: `续篇第 1 日上午，宅邸起居室。莉莉希雅向诺雅提出了寻找两人共用香气的邀请；你可以接受、推迟或改变计划。\n\n<UpdateVariable><Analyze>开场初值由世界书载入，本轮没有额外变化</Analyze><JSONPatch>[]</JSONPatch></UpdateVariable>\n\n<StatusPlaceHolderImpl/>`,
     mes_example: '',
-    creator_notes: '成品 A（N1/N2），待用户手验：原生回复自动同步、Markdown 与经清理的正文染色。变量初始化与保存链沿用已确认版本。本阶段仍保留旧面板和标注占位图；轻前端及图片接入属于后续成品 B。内嵌组件存在不代表宿主已完成世界书链接、角色正则许可或远程脚本执行。本卡 Schema 和界面从配置的 Vite 地址载入，需保持开发服务运行。沿用 P1 卡名以保持脚本识别和组件身份；NA 世界书使用独立名称保留 R2，旧聊天不自动迁移。',
+    creator_notes: '成品 A 已获用户接受；N3 Grid 人物轻前端待手验，图片接入留 N4。变量初始化与保存链沿用已确认版本。卡内容由命令行推送，NA 世界书按本地源码整本覆盖；前端由固定地址异步加载，构建后刷新即可获取新版。内嵌组件存在不代表宿主已完成世界书链接、角色正则许可或远程脚本执行。本卡 Schema 和界面从配置的 Vite 地址载入，需保持开发服务运行。沿用 P1 卡名以保持脚本识别和组件身份；保留旧 R2 世界书，旧聊天不自动迁移。',
     system_prompt: '',
     post_history_instructions: '',
     alternate_greetings: [],

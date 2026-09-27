@@ -1,8 +1,9 @@
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, renameSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createCard } from '../src/card.ts';
+import { createLiveLoader } from './live-loader.mjs';
 import { assetBaseUrl, devOrigin, hostOrigins } from '../delivery.config.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -14,15 +15,16 @@ const schemaBundle = readFileSync(resolve(root, 'dist/schema.js'), 'utf8');
 const stateBundle = readFileSync(resolve(root, 'dist/state.js'), 'utf8');
 const stateCss = readFileSync(resolve(root, 'dist/state.css'), 'utf8');
 if (!schemaBundle.trim() || !stateBundle.trim() || !stateCss.trim()) throw Error('Build outputs are empty; run npm run build first');
-const version = createHash('sha256').update(JSON.stringify([base.href, schemaBundle, stateBundle, stateCss])).digest('hex').slice(0, 12);
+const version = createHash('sha256').update(JSON.stringify(['live-html-v1', base.href, schemaBundle, stateBundle, stateCss])).digest('hex').slice(0, 12);
 const runtime = `p2-${version}`;
 const schemaUrl = new URL(`${runtime}/schema.js`, base).href;
 const stateUrl = new URL(`${runtime}/state.js`, base).href;
 const styleUrl = new URL(`${runtime}/state.css`, base).href;
 const htmlUrl = new URL(`${runtime}/state.html`, base).href;
+const liveHtmlUrl = new URL('live/state.html', base).href;
 // Load into the existing Helper iframe so its message identity and APIs stay intact.
 const attribute = (url: string) => url.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
-const stateHtml = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style id="dlnm-nvl-style">${stateCss.replace(/<\/style/gi, '<\\/style')}</style><style>html,body{margin:0;background:#111;color:#eee}#dlnm-state{min-height:44px}</style></head><body><div id="dlnm-state">正在加载 NVL 阅读界面…</div><script src="${attribute(stateUrl)}" onerror="document.getElementById('dlnm-state').textContent='阅读界面加载失败，请检查使用说明中的 Vite 服务与资源地址。'"></script></body></html>`;
+const stateHtml = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style id="dlnm-nvl-style">${stateCss.replace(/<\/style/gi, '<\\/style')}</style><style>html,body{margin:0;background:#111;color:#eee}#dlnm-state{min-height:44px}</style></head><body><div id="dlnm-state">正在加载 NVL 阅读界面…</div><script data-dlnm-entry src="${attribute(stateUrl)}" onerror="document.getElementById('dlnm-state').textContent='阅读界面加载失败，请检查使用说明中的 Vite 服务与资源地址。'"></script></body></html>`;
 const schemaScript = `void import(${JSON.stringify(schemaUrl)}).catch(error => console.error('[DLNM Schema] 资源加载失败，请检查 Vite 服务与资源地址', error));`;
 const loaderScript = `// MVU 183d8ade; dedicated test card only. No model calls.
 void (async () => {
@@ -30,11 +32,11 @@ void (async () => {
   // Always start this card's pinned lifecycle; MVU's unique-script registry chooses the active instance.
   await import('https://testingcf.jsdelivr.net/gh/MagicalAstrogy/MagVarUpdate@183d8ade3b9a3369e824a55cb13b4ddf91aada50/artifact/bundle.js');
 })().catch(error => console.error('[DLNM MVU] 加载失败', error));`;
-const card = createCard({ schemaScript, loaderScript, stateHtml });
+const card = createCard({ schemaScript, loaderScript, stateHtml: createLiveLoader(liveHtmlUrl) });
 const content = JSON.stringify(card, null, 2) + '\n';
 const hash = createHash('sha256').update(content).digest('hex');
 const name = `dlnm-mvu-p2-dev-${hash.slice(0, 12)}`;
-const instructions = `# DLNM N3：Grid 人物轻前端
+const instructions = `# DLNM N3＋命令行同步与动态前端
 
 ## 本次变化（2026-09-27）
 
@@ -44,7 +46,7 @@ const instructions = `# DLNM N3：Grid 人物轻前端
 
 旧会话 mode: panel 仅映射为轻前端，不自动申请全屏，不清空草稿、等待状态或阅读位置。新 iframe 接管时旧人物栏退役；全屏内流式正文、发送等待和 MVU 保存链保留。详情在同一界面的数据刷新中保持展开状态；切换轻前端/全屏或重建 iframe 后按默认折叠。
 
-沿用完整卡交付方式，在专用副本导入本次新 JSON；已有 NA 世界书继续链接，无需重装同一世界书或酒馆助手。卡版本字段仍为 p2-nvl-na，以文件名哈希识别新包。旧卡固定引用旧资源，仅刷新旧卡或重启 Vite 仍会加载旧 JS。
+已有角色使用 npm run sync:push 更新：整本覆盖 NA 世界书，同时更新角色内容、正则与脚本。只在初次建立角色时使用导入 JSON；以后更新省去重复导入。卡版本字段仍为 p2-nvl-na，以文件名哈希识别新包。首次推送把旧卡的固定前端地址换成 ${liveHtmlUrl}，之后只修改前端时 npm run build，再刷新酒馆或重新渲染消息即可。已经打开的界面不会被强制中断或自动换代。
 
 本包是 N3 检查点，不是完整成品 B：头像与全屏场景仍为标注几何占位，N4 public/Illustration-Gremlin 和 N5 世界书扩充尚未实施。本轮仅构建打包与源码回读，自动测试、类型检查、lint、浏览器、真实酒馆和模型调用均未执行；N3 等待用户手验。
 
@@ -56,12 +58,12 @@ const instructions = `# DLNM N3：Grid 人物轻前端
 - 配套资源：${resolve(root, `dist/${runtime}`)} 下的 schema.js、state.js、state.css、state.html。ZIP 保留 ${runtime}/ 目录；恢复时放回项目 dist/，保留其他版本目录。
 - PowerShell 进入项目并启动 Vite：Set-Location -LiteralPath '${root.replaceAll("'", "''")}'; npm run dev
 - 地址：${devOrigin}/。保持终端开启，结束时 Ctrl+C；端口占用会报错，不自动换端口。
-- Vite 仅服务 dist 构建文件。改源码后 npm run build 再导入新卡包；刷新旧卡依然读旧固定资源。npm run pack 仅装配已有构建，二者均不串联测试。
+- Vite 仅服务 dist 构建文件。前端改动：npm run build；卡内容/世界书/Schema/脚本/正则改动：npm run sync:push（先构建，再推送）。npm run pack 仅装配已有构建；上述命令均不串联测试。HTML 用固定地址异步读取，内含同一构建的 CSS 与固定版本 JS，避免样式和逻辑混版。
 
-## 2. 导入（先保留旧对象）
+## 2. 首次接入与日常同步
 
-1. 导出备份旧卡与聊天。在专用副本导入本 JSON；遇到同名角色不要直接覆盖原卡。卡名仍为 DLNM-P1-香气链路，供既有脚本识别。
-2. 已有 ${card.data.character_book.name} 时直接链接；尚未导入才导入本包内嵌世界书。它包含新增正文呈现约定，继续链接 R2 旧书就不会得到这条新指示。保留旧书，不批量修改历史聊天。
+1. 已有卡：按 ${resolve(root, 'docs/SYNC.md')} 配置准确的角色文件名，运行 npm run sync:push；新装才导入本 JSON。卡名仍为 DLNM-P1-香气链路，供既有脚本识别。本地源码以 Git 备份，不另建备份目录；Git 不包含酒馆聊天存档。
+2. 推送会整本覆盖并绑定 ${card.data.character_book.name}，按本地源码删除远端多余条目；这是明确选定的行为。若采用首次手动导入，仍需在酒馆导入并链接内嵌世界书。旧 R2 书和聊天消息保持原样。
 3. 确认本卡 3 条角色正则、2 项脚本启用；[initvar] 保持提示禁用。初值继续来自同一 19 字段 YAML，旧聊天和初始数值均不自动迁移。
 4. 保持已有 MVU、Schema 及酒馆助手路径正常；没有新增独立安装包或依赖库。宿主需要已有的 SillyTavern.libs.showdown/DOMPurify。缺组件时给出说明并显示原文，不插入未经清理的 HTML。
 5. 最新回复默认出现人物状态轻前端；点击“浏览器全屏阅读”才请求浏览器全屏，返回/Escape 回到轻前端。全屏功能未开放的浏览器继续使用原生聊天和人物状态。
@@ -128,12 +130,13 @@ const instructions = `# DLNM N3：Grid 人物轻前端
 - Schema：${schemaUrl}
 - 界面：${stateUrl}
 - 样式：${styleUrl}（同份编译 CSS 已封装进 HTML）
-- HTML：${htmlUrl}（实际使用仍需要酒馆助手消息 iframe 上下文）
+- 固定 HTML 入口：${liveHtmlUrl}（实际使用仍需要酒馆助手消息 iframe 上下文）
+- 本次 HTML 内容：${htmlUrl}；CSS 随 HTML 一起更新，卡里只保留小型异步加载器
 - MVU 和 Zod 注册沿用固定提交 CDN；本包不是全离线包。
 
 地址由 ${resolve(root, 'delivery.config.mjs')} 管理，允许的酒馆来源：${hostOrigins.join('、')}。
 当前仅监听电脑 127.0.0.1；手机同名地址指手机自己，本次未开放局域网。窄屏检查不等于真实手机资源可达。
-没有创建远程仓库、Git 写入、部署或发布；新包和旧包分别保留。
+没有创建远程仓库、部署或发布；改前源码以本地 Git 提交 886753b 留存，新包和旧包分别保留。推送命令按用户要求没有内容差异检查、回读校验或自动备份。
 `;
 // Immutable checkpoints: allow identical re-packs, stop on any content collision.
 const outputs = new Map([
@@ -153,4 +156,12 @@ for (const [relative, value] of outputs) {
   mkdirSync(dirname(path), { recursive: true });
   if (!existsSync(path)) writeFileSync(path, value, { flag: 'wx' });
 }
-console.log(`P2 package: artifacts/${name}.json\nGuide: artifacts/${name}.md\nRuntime: dist/${runtime}/\nSHA256 ${hash}\nTests not run; host loading and user acceptance pending.`);
+// Publish the complete HTML only after its immutable JS/CSS exist. Card text stays outside dist.
+for (const [relative, value] of [['dist/live/state.html', stateHtml], ['artifacts/dlnm-sync.json', content]]) {
+  const path = resolve(root, relative);
+  mkdirSync(dirname(path), { recursive: true });
+  const temporary = `${path}.${process.pid}.tmp`;
+  writeFileSync(temporary, value);
+  renameSync(temporary, path);
+}
+console.log(`P2 package: artifacts/${name}.json\nGuide: artifacts/${name}.md\nRuntime: dist/${runtime}/\nLive UI: ${liveHtmlUrl}\nSync input: artifacts/dlnm-sync.json\nSHA256 ${hash}\nTests not run; host loading and user acceptance pending.`);

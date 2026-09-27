@@ -1,0 +1,70 @@
+# 命令行推送与动态前端
+
+本项目参照 `E:\PersonalAI\archived\tavern_helper_template\tavern_sync.mjs` 的“本地内容覆盖酒馆”方式，直接调用现有 SillyTavern HTTP 接口。不复制模板的 Webpack、YAML 维护层、Socket.IO 服务或浏览器接收脚本，不增加依赖。
+
+世界书按本地内容**整本覆盖**。没有内容差异检查、目标枚举、推送后回读、自动重试或备份目录。保留 HTTP 失败提示和酒馆自己的认证、CSRF 防护。这里的 HTTP 接口是酒馆自带的本机更新入口，不是模型 API，不产生模型请求。
+
+## 1. 一次性接入
+
+项目目录：`E:\PersonalAI\archived\SmallProjects\demon_lily_and_the_noir_maid`。
+
+1. 保持酒馆运行。编辑 `E:\PersonalAI\archived\SmallProjects\demon_lily_and_the_noir_maid\delivery.config.mjs`：
+   - `tavernOrigin`：默认 `http://127.0.0.1:8000`。
+   - `characterFile`：**已经存在的角色 PNG 文件名**，默认 `DLNM-P1-香气链路.png`。重复导入过的卡可能带数字后缀，填要维护的那张卡的实际文件名；脚本直接使用它，不按显示名猜测。可从浏览器中该角色头像请求的 `file` 参数取得。
+   - `assetBaseUrl`：保持当前 `http://127.0.0.1:5173/`。以后换资源服务器才调整。
+2. 一个终端启动资源服务：
+
+   ```powershell
+   Set-Location -LiteralPath 'E:\PersonalAI\archived\SmallProjects\demon_lily_and_the_noir_maid'
+   npm run dev
+   ```
+
+3. 另一个终端进入同一目录，首次推送：
+
+   ```powershell
+   npm run sync:push
+   ```
+
+   该命令先执行现有构建/装配，再更新现有角色。无需重新导入卡、另装同步接收脚本或开启 6620 端口。若酒馆里还没有该角色，先导入构建出的卡 JSON 一次；同步入口只更新现有卡，不自动创建重复卡。
+
+4. 刷新酒馆页面，令它重新读取角色、世界书、正则和脚本。首次推送将旧前端入口替换为固定地址；之后每次重建前端都省去推送和导入。
+
+可单次指定另一份现有角色文件：
+
+```powershell
+npm run sync:push -- --avatar '实际文件名.png'
+```
+
+有登录认证的酒馆需要已有登录会话；可在当前终端的 `TAVERN_COOKIE` 环境变量中传入 Cookie，脚本只在内存中使用，不打印或落盘。不要提交 Cookie。401/403 时处理登录与现有认证设置，保持 CSRF 防护开启；本轮没有读取你的登录资料。
+
+## 2. 以后怎么更新
+
+| 修改内容 | 命令 | 酒馆端 |
+| --- | --- | --- |
+| 人物设定、开场、世界书、正则、Helper 脚本或 Schema | `npm run sync:push` | 完成后刷新页面，不重复导入 |
+| Vue 界面、样式、前端显示逻辑 | `npm run build` | 刷新页面或重新渲染消息，不推送卡 |
+| 仅推送上次已经构建的内容 | `npm run sync -- push` | 使用当前 `artifacts/dlnm-sync.json`，不会自动编译源码 |
+
+HTTP 顺序固定为：获取当前请求的 CSRF token → 覆盖指定世界书 → 更新指定角色文件。角色更新包括内嵌世界书、绑定书名、创作字段、完整正则数组和完整脚本数组；未指定的宿主字段保留。头像继续取同一 PNG 的图像，酒馆可能重新编码 PNG；聊天文件、swipe、MVU 消息变量不在推送目标中。修改开场只影响卡的开场定义，不重写已有聊天第 0 楼。
+
+世界书先成功、卡更新后失败时会明确报告部分完成。修正文件名或连接后再次执行同一命令；不自动撤销，也不伪装成整体成功。推送期间避免在酒馆编辑同一张卡/书，结束后刷新，防止浏览器里的旧编辑内容再保存回去。
+
+前端固定入口：`http://127.0.0.1:5173/live/state.html`。卡内仅留一个异步加载器，以 `no-store` 读取此 HTML，取出本卡样式与入口 JS，在**原酒馆助手消息 iframe** 内挂载；保留所在消息身份、Helper 全局接口和 `dlnm-nvl-style` 全屏样式来源。HTML 内指向同次构建的版本 JS，先生成完整资源再更新固定入口。已经打开的界面不会在输入、生成或全屏阅读中被强制换代；重新渲染/刷新后读取新版。这是异步资源加载，不是源码保存即生效的 HMR。
+
+`npm run dev` 仍只服务 `dist`；卡文本留在 `artifacts`，不随资源服务公开。当前仅本机可达，手机的 `127.0.0.1` 指手机自己，局域网地址配置留到相应阶段。
+
+## 3. 本地 Git 备份
+
+- 本次改动前工作树干净，已有提交 `886753b`（`feat: light weighted plain status`）作为基线。额外标签写入请求未获执行，没有创建新标签或备份目录。
+- 后续用本地 Git 提交维护源码版本；构建产物仍按项目现有规则忽略。Git 保存的是已提交源码，未提交改动和酒馆聊天存档不自动获得备份。
+- 回滚时恢复选定 Git 版本的源码再构建、推送。回退到接入同步前的版本时，该版本尚无本命令，需要使用它原有的打包/导入流程。
+- `live` 地址始终指向最近一次构建；旧 JSON 使用同一动态入口，不等于冻结旧前端。恢复旧前端应恢复相应源码再构建，而不是只换一个旧 JSON 文件。
+
+## 4. 来源与验收边界
+
+- 模板参考：`E:\PersonalAI\archived\tavern_helper_template\tavern_sync.mjs`，本地模板提交 `4a9344276d925a83e32726c58b9b05debdf4a8ad`；本项目脚本是适配实现，不是上游原文件。
+- 2026-09-27 只读 GET `/version`：宿主 SillyTavern 1.17.0 / release / `aa50edcf4`。对应提交的 [角色字段合并接口](https://github.com/SillyTavern/SillyTavern/blob/aa50edcf4/src/endpoints/characters.js)、[deepMerge 数组替换语义](https://github.com/SillyTavern/SillyTavern/blob/aa50edcf4/src/util.js)、[整本世界书写入](https://github.com/SillyTavern/SillyTavern/blob/aa50edcf4/src/endpoints/worldinfo.js)、[CSRF 会话机制](https://github.com/SillyTavern/SillyTavern/blob/aa50edcf4/src/server-main.js) 已只读核对。
+- 世界书转换依据实际宿主的 `public/scripts/world-info.js` 中 `convertCharacterBook`。没有改动宿主源码、设置或认证。
+- 构建只证明本地编译和装配。首次推送、登录模式、资源异步执行、浏览器全屏、刷新后持久化仍待真实酒馆手验；代理本轮没有执行 POST、浏览器或模型操作。
+- `npm run check:sync` 是另行提供的可选本地检查，只使用内存请求替身，不接触酒馆；默认构建/推送不调用它，本轮按要求不运行测试、类型检查或 lint。
+- Library 路由：`sillytavern-card-pipeline`，快照 `2026-08-18`，采用 A0/A2/D1/D4 的对应边界；未采用设计候选。N4/N5 保持未实施。
