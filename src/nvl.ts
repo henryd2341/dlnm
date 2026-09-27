@@ -38,6 +38,9 @@ function replyForWaiting(pages: NvlPage[], waiting: WaitingTurn) {
   return waiting.replyId !== undefined ? pages.find(page => page.id === waiting.replyId)
     : waiting.userId === null ? undefined : pages.find(page => page.promptId === waiting.userId);
 }
+export function displayStateId(pages: NvlPage[], selectedId: number, hosted: boolean) {
+  return hosted ? selectedId : pages.at(-1)?.id ?? -1;
+}
 
 type HostWindow = Window & typeof globalThis & { SillyTavern?: { getContext(): typeof SillyTavern } };
 type Stream = { messageId: number; type: string; result: string; continueMessage: string; isFinished: boolean; isStopped: boolean };
@@ -52,13 +55,13 @@ export function useNvl() {
   const snapshot = ref<State | null>(null), stateMessageId = ref<number | null>(null);
   const draft = ref(''), busy = ref(false), connected = ref(false), hosted = ref(false), chatKey = ref('');
   const opening = ref(false);
+  const superseded = ref(false);
   const following = ref(true);
-  const mode = ref<'fullscreen' | 'panel'>('fullscreen'), surfaceTarget = shallowRef<HTMLElement | null>(null);
+  const surfaceTarget = shallowRef<HTMLElement | null>(null);
   const notice = ref(''), stateError = ref('等待酒馆与 MVU'), initDetails = ref(''), validLatest = ref(false);
   const error = computed(() => [notice.value, stateError.value, initDetails.value].filter(Boolean).join(' '));
   const canSend = computed(() => hosted.value && connected.value && validLatest.value && !busy.value && !waitingTurn.value && selectedId.value === pages.value.at(-1)?.id);
   let host: HostWindow, frame: HTMLIFrameElement, row: HTMLElement, chat: HTMLElement;
-  let style: HTMLStyleElement | undefined, observer: ResizeObserver | undefined;
   let dialog: HTMLDialogElement | undefined, surfaceGeneration = 0;
   let closed = false, nativeMode = false, ownsStorage = false;
   let timer: ReturnType<typeof setTimeout> | undefined, readyTimer: ReturnType<typeof setTimeout> | undefined, sendTimer: ReturnType<typeof setTimeout> | undefined;
@@ -88,7 +91,7 @@ export function useNvl() {
   }
   function persist() {
     if (closed || !ownsStorage || !chatKey.value) return;
-    try { host.sessionStorage.setItem(`dlnm:nvl:${chatKey.value}`, JSON.stringify({ draft: draft.value, selectedId: selectedId.value, following: following.value, native: nativeMode, mode: mode.value, waitingTurn: waitingTurn.value, generationType })); }
+    try { host.sessionStorage.setItem(`dlnm:nvl:${chatKey.value}`, JSON.stringify({ draft: draft.value, selectedId: selectedId.value, following: following.value, native: nativeMode, mode: nativeMode ? 'light' : 'fullscreen', waitingTurn: waitingTurn.value, generationType })); }
     catch { notice.value = '浏览器草稿存储不可用；当前草稿仍在，请在关闭或刷新前自行复制。'; }
   }
   function readSaved() {
@@ -96,8 +99,8 @@ export function useNvl() {
       const saved = JSON.parse(host.sessionStorage.getItem(`dlnm:nvl:${chatKey.value}`) || '{}');
       selectedId.value = Number.isSafeInteger(saved.selectedId) ? saved.selectedId : -1;
       following.value = saved.following !== false;
-      nativeMode = saved.native === true;
-      mode.value = saved.mode === 'panel' ? 'panel' : 'fullscreen';
+      // Old panel sessions become light UI; keep their draft and reading selection intact.
+      nativeMode = saved.native === true || saved.mode === 'panel' || saved.mode === 'light';
       draft.value = typeof saved.draft === 'string' ? saved.draft : '';
       generationType = ['normal', 'continue', 'regenerate', 'swipe'].includes(saved.generationType) ? saved.generationType : 'normal';
       const waiting = saved.waitingTurn as WaitingTurn | undefined;
@@ -112,15 +115,17 @@ export function useNvl() {
     } catch { notice.value = '本地阅读记录读取失败，原记录保留；本次草稿仅留在界面，请在退出前自行复制。'; return false; }
   }
   watch(draft, persist, { flush: 'sync' });
+  function statePageId() { return displayStateId(readingPages.value, selectedId.value, hosted.value); }
   function readSelected() {
     validLatest.value = false;
-    const waiting = selectedId.value === WAITING_PAGE ? waitingTurn.value : null;
-    if (waiting || ((busy.value || awaitingState) && selectedId.value === readingPages.value.at(-1)?.id)) {
+    const displayId = statePageId();
+    const waiting = displayId === WAITING_PAGE ? waitingTurn.value : null;
+    if (waiting || ((busy.value || awaitingState) && displayId === readingPages.value.at(-1)?.id)) {
       // Only a display fallback: never copy these values into the new message or MVU.
       if (!snapshot.value) {
         for (let index = pages.value.length - 1; index >= 0; index--) {
           const id = pages.value[index]!.id;
-          if (!waiting && id >= selectedId.value) continue;
+          if (!waiting && id >= displayId) continue;
           try { const result = readStateAt(id); snapshot.value = result.state; stateMessageId.value = id; break; } catch { /* Try the preceding saved reply. */ }
         }
       }
@@ -128,25 +133,25 @@ export function useNvl() {
         : busy.value ? '回复生成中，人物状态暂留上一份有效值；结束后自动同步。' : '正文已收到，等待本轮 MVU 保存；人物状态暂留上一份有效值。';
       return;
     }
-    if (selectedId.value < 0) { stateError.value = '等待可显示的真实回复。'; return; }
+    if (displayId < 0) { stateError.value = '等待可显示的真实回复。'; return; }
     try {
-      const result = readStateAt(selectedId.value), messages = context().chat, latest = messages.at(-1);
+      const result = readStateAt(displayId), messages = context().chat, latest = messages.at(-1);
       snapshot.value = result.state; stateMessageId.value = result.messageId;
       initDetails.value = '';
-      validLatest.value = !result.pending && selectedId.value === messages.length - 1 && !!latest && !latest.is_user;
+      validLatest.value = !result.pending && displayId === messages.length - 1 && !!latest && !latest.is_user;
       stateError.value = result.pending ? '状态待同步：本轮保留原状态，请返回酒馆修复或重生成。'
         : latest?.is_user ? '行动已送出，等待当前回复；如生成失败，请返回酒馆继续处理。'
-        : selectedId.value !== pages.value.at(-1)?.id ? '正在回看历史，人物状态跟随本轮；返回最新后再发送。' : '';
+        : displayId !== pages.value.at(-1)?.id ? '正在回看历史，人物状态跟随本轮；返回最新后再发送。' : '';
     } catch (cause) { stateError.value = cause instanceof Error ? cause.message : '读取当前回复的 MVU 状态失败；正文、草稿和原状态保留。'; }
   }
   async function diagnoseInit() {
-    const key = chatKey.value, id = selectedId.value;
+    const key = chatKey.value, id = statePageId();
     if (id < 0) return;
     try {
       const book = getCharWorldbookNames('current').primary;
       if (!book) { initDetails.value = '本角色未绑定主世界书；请在酒馆导入并链接修订包内的世界书，保留原卡与聊天。'; return; }
       const entries = await getWorldbook(book);
-      if (!isCurrent() || key !== chatKey.value || id !== selectedId.value || snapshot.value) return;
+      if (!isCurrent() || key !== chatKey.value || id !== statePageId() || snapshot.value) return;
       const init = entries.find(entry => entry.name.toLowerCase().includes('[initvar]') && entry.name.includes('DLNM'));
       if (!init) { initDetails.value = `已绑定“${book}”，但未找到本卡的 [initvar] 条目；请核对卡包与世界书版本。`; return; }
       if (!init.content.trim()) { initDetails.value = `“${book}”的 [initvar] 内容为空；修订包提供完整 YAML 初值，保留旧书并链接 NA 世界书。`; return; }
@@ -156,17 +161,17 @@ export function useNvl() {
         ? `“${book}”已被 MVU 标记初始化，本楼数据仍缺失或不符合本卡字段；原存档保留，不自动重置。请先保留旧聊天，再以修订卡新建独立开场核对。`
         : `已找到“${book}”的 [initvar]（提示禁用属正常），但本楼尚无可用初值；请核对 MVU 启用、世界书内容和两个脚本的加载提示。`;
     } catch (cause) {
-      if (isCurrent() && key === chatKey.value && id === selectedId.value && !snapshot.value) initDetails.value = `初值只读诊断：${cause instanceof Error ? cause.message : '读取世界书失败'}。`;
+      if (isCurrent() && key === chatKey.value && id === statePageId() && !snapshot.value) initDetails.value = `初值只读诊断：${cause instanceof Error ? cause.message : '读取世界书失败'}。`;
     }
   }
   function waitForState() {
     clearTimeout(stateTimer); stateDeadline = Date.now() + 15000;
-    if (selectedId.value === WAITING_PAGE) return;
+    if (statePageId() === WAITING_PAGE) return;
     if (!snapshot.value) void diagnoseInit();
     const poll = () => {
       if (!connected.value || !isCurrent()) return;
       readSelected();
-      if (busy.value || (!awaitingState && snapshot.value && stateMessageId.value === selectedId.value)) return;
+      if (busy.value || (!awaitingState && snapshot.value && stateMessageId.value === statePageId())) return;
       if (Date.now() < stateDeadline) stateTimer = setTimeout(poll, 250);
       else if (awaitingState) stateError.value = '状态待同步：本轮保存尚未确认，正文和草稿保留；请返回酒馆核对或修复，完成后自动重读。';
       else { stateError.value += ' 自动初始化未完成；不需要发送聊天消息，请检查下方组件诊断。'; void diagnoseInit(); }
@@ -176,6 +181,7 @@ export function useNvl() {
   }
   function retryState() { notice.value = ''; initDetails.value = ''; refresh(); waitForState(); }
   function changedChat() {
+    superseded.value = true;
     exitReaderFullscreen();
     retire();
     waitingTurn.value = null; pages.value = []; snapshot.value = null; stateMessageId.value = null; draft.value = '';
@@ -238,18 +244,12 @@ export function useNvl() {
   function release() {
     surfaceGeneration++;
     persist();
-    surfaceStops.splice(0).forEach(stop => stop()); observer?.disconnect(); observer = undefined;
-    style?.remove(); style = undefined;
+    surfaceStops.splice(0).forEach(stop => stop());
     const previousDialog = dialog;
     dialog = undefined; surfaceTarget.value = null;
     previousDialog?.close();
     // Let Teleport move/unmount its own nodes before removing the old target.
     if (previousDialog) void nextTick(() => previousDialog.remove());
-    if (frame?.hasAttribute('data-dlnm-nvl-frame')) {
-      frame.removeAttribute('data-dlnm-nvl-frame'); row.removeAttribute('data-dlnm-nvl-row');
-      chat.removeAttribute('data-dlnm-nvl-chat'); chat.style.removeProperty('--dlnm-reader-height');
-      host.document.getElementById('form_sheld')?.removeAttribute('data-dlnm-nvl-input');
-    }
     hosted.value = false;
   }
   function cancelStream() {
@@ -262,7 +262,7 @@ export function useNvl() {
     host?.document.removeEventListener(ownerEvent, receiveOwner);
   }
   function receiveOwner(event: Event) {
-    if ((event as CustomEvent).detail !== ownerToken) retire();
+    if ((event as CustomEvent).detail !== ownerToken) { superseded.value = true; retire(); }
   }
   function receiveToken(text: string) {
     if (!isCurrent() || !busy.value || typeof text !== 'string') return;
@@ -378,7 +378,6 @@ export function useNvl() {
       waitForState();
     }, 0);
   }
-  function resize() { if (hosted.value) chat.style.setProperty('--dlnm-reader-height', `${Math.max(260, chat.clientHeight)}px`); }
   function isReaderFullscreen() {
     const root = host.document.documentElement;
     return host.document.fullscreenElement === root && root.hasAttribute('data-dlnm-fullscreen');
@@ -395,15 +394,21 @@ export function useNvl() {
     host.clearTimeout(Number(root.getAttribute('data-dlnm-fullscreen-cleanup')));
     root.removeAttribute('data-dlnm-fullscreen-cleanup');
   }
+  function returnToLight() {
+    nativeMode = true; release(); exitReaderFullscreen();
+    // Light UI follows current progress; retain the separate fullscreen reading selection.
+    snapshot.value = null; stateMessageId.value = null;
+    refresh(); waitForState();
+  }
   async function openFullscreen(generation: number) {
     const root = host.document.documentElement;
-    if (typeof root.requestFullscreen !== 'function' || !host.document.fullscreenEnabled) throw Error('当前浏览器未开放 Fullscreen API；请手动选择面板模式。');
+    if (typeof root.requestFullscreen !== 'function' || !host.document.fullscreenEnabled) throw Error('当前浏览器未开放 Fullscreen API；人物状态与酒馆原生聊天继续可用。');
     if (host.document.fullscreenElement && !isReaderFullscreen()) throw Error('另一界面正在使用浏览器全屏，请先退出再打开阅读。');
     const sourceCss = document.getElementById('dlnm-nvl-style')?.textContent;
     if (!sourceCss?.trim()) throw Error('本卡样式缺失，请加载同一修订包的 HTML 和脚本。');
     const opener = host.document.activeElement as HTMLElement | null;
     const popup = host.document.createElement('dialog');
-    if (typeof popup.showModal !== 'function') throw Error('此浏览器缺少全屏阅读层能力；可手动选择面板模式。');
+    if (typeof popup.showModal !== 'function') throw Error('此浏览器缺少全屏阅读层能力；人物状态与酒馆原生聊天继续可用。');
     popup.setAttribute('aria-label', '恶魔少女与黑之女仆 · 全屏阅读');
     popup.setAttribute('data-dlnm-nvl-dialog', '');
     popup.addEventListener('close', () => {
@@ -435,12 +440,12 @@ export function useNvl() {
       try { await root.requestFullscreen({ navigationUI: 'hide' }); }
       catch {
         if (generation === surfaceGeneration) root.removeAttribute('data-dlnm-fullscreen');
-        throw Error('浏览器未进入全屏；请点击“浏览器全屏阅读”重试，或手动选择面板模式。');
+        throw Error('浏览器未进入全屏；请点击“浏览器全屏阅读”重试，或继续使用人物状态与酒馆原生聊天。');
       }
     }
     if (abandonIfStale()) return false;
     const fullscreenChanged = () => {
-      if (!isReaderFullscreen()) { root.removeAttribute('data-dlnm-fullscreen'); nativeMode = true; release(); }
+      if (!isReaderFullscreen()) { root.removeAttribute('data-dlnm-fullscreen'); returnToLight(); }
     };
     host.document.addEventListener('fullscreenchange', fullscreenChanged);
     surfaceStops.push(() => host.document.removeEventListener('fullscreenchange', fullscreenChanged));
@@ -455,53 +460,31 @@ export function useNvl() {
     surfaceStops.push(() => { host.visualViewport?.removeEventListener('resize', fit); host.visualViewport?.removeEventListener('scroll', fit); host.removeEventListener('resize', fit); });
     popup.addEventListener('cancel', event => { event.preventDefault(); void toggleHost(); });
     surfaceTarget.value = target; hosted.value = true;
+    snapshot.value = null; stateMessageId.value = null; readSelected();
     await nextTick();
     if (abandonIfStale()) return false;
     popup.showModal();
     target.querySelector<HTMLElement>('button')?.focus({ preventScroll: true });
     return true;
   }
-  async function acquire(requestedMode?: 'fullscreen' | 'panel') {
+  async function acquire() {
     if (!isCurrent() || !frame.isConnected || !row.isConnected) { notice.value = '当前阅读入口已失效，请在最新回复重新打开。'; return; }
     if (getCurrentMessageId() !== context().chat.findLastIndex(message => !message.is_user && !message.is_system && message.extra?.type !== 'narrator')) { notice.value = '请在最新角色回复打开阅读入口。'; return; }
     clearFullscreenCleanup();
     release();
     const generation = surfaceGeneration;
-    if (requestedMode) mode.value = requestedMode;
     nativeMode = false;
-    if (mode.value === 'fullscreen') {
-      try { if (!await openFullscreen(generation)) { if (generation === surfaceGeneration) release(); return; } }
-      catch (cause) { if (generation !== surfaceGeneration) return; throw cause; }
-    } else {
-    frame.setAttribute('data-dlnm-nvl-frame', ''); row.setAttribute('data-dlnm-nvl-row', ''); chat.setAttribute('data-dlnm-nvl-chat', '');
-    host.document.getElementById('form_sheld')?.setAttribute('data-dlnm-nvl-input', '');
-    style = host.document.createElement('style');
-    style.textContent = `
-      #chat[data-dlnm-nvl-chat]{display:block!important;overflow:hidden!important;padding:0!important}
-      #chat[data-dlnm-nvl-chat]>.mes:not([data-dlnm-nvl-row]){display:none!important}
-      #chat[data-dlnm-nvl-chat]>.mes[data-dlnm-nvl-row]{display:block!important;margin:0!important;padding:0!important;border:0!important;width:100%!important;min-height:0!important}
-      [data-dlnm-nvl-row]>.mesAvatarWrapper,[data-dlnm-nvl-row]>.avatar{display:none!important}
-      [data-dlnm-nvl-row]>.mes_block{width:100%!important;padding:0!important;margin:0!important}
-      [data-dlnm-nvl-row]>.mes_block>:not(.mes_text){display:none!important}
-      [data-dlnm-nvl-row] .mes_text{font-size:0!important;margin:0!important;padding:0!important}
-      [data-dlnm-nvl-row] .mes_text>:not([data-dlnm-nvl-frame]):not(:has([data-dlnm-nvl-frame])){display:none!important}
-      iframe[data-dlnm-nvl-frame]{width:100%!important;height:var(--dlnm-reader-height,70vh)!important;border:0!important;display:block!important}
-      #form_sheld[data-dlnm-nvl-input]{display:none!important}`;
-    host.document.head.append(style); hosted.value = true;
-    observer = new ResizeObserver(resize); observer.observe(chat); resize();
-    }
+    try { if (!await openFullscreen(generation)) { if (generation === surfaceGeneration) release(); return; } }
+    catch (cause) { if (generation !== surfaceGeneration) return; throw cause; }
     refresh(); waitForState();
   }
-  async function toggleHost(requestedMode?: 'fullscreen' | 'panel') {
+  async function toggleHost() {
     if (!connected.value || opening.value) return;
     opening.value = true;
     try {
-      if (hosted.value && !requestedMode) { nativeMode = true; release(); exitReaderFullscreen(); }
-      else {
-        if (requestedMode === 'panel') { release(); exitReaderFullscreen(); }
-        await acquire(requestedMode);
-      }
-    } catch (cause) { release(); exitReaderFullscreen(); notice.value = cause instanceof Error ? cause.message : '阅读入口接入失败，已恢复酒馆界面。'; }
+      if (hosted.value) returnToLight();
+      else await acquire();
+    } catch (cause) { returnToLight(); notice.value = cause instanceof Error ? cause.message : '阅读入口接入失败，已恢复酒馆界面。'; }
     finally { opening.value = false; }
   }
   function send() {
@@ -555,7 +538,7 @@ export function useNvl() {
       if (!isCurrent() || !frame.isConnected || frame.contentWindow !== window) return;
       if (!document.getElementById('dlnm-nvl-style')?.textContent?.trim()) throw Error('本卡 NVL 样式缺失；请导入修订卡并加载配套版本资源。');
       if (getCurrentMessageId() !== context().chat.findLastIndex(message => !message.is_user && !message.is_system && message.extra?.type !== 'narrator')) {
-        notice.value = '请使用最新角色回复的阅读入口。'; return;
+        superseded.value = true; return;
       }
       // Data ownership outlives opening/closing the reader. A replacement iframe retires the old subscriber.
       host.document.dispatchEvent(new CustomEvent(ownerEvent, { detail: ownerToken }));
@@ -588,7 +571,7 @@ export function useNvl() {
       stops.push(eventOn(Mvu.events.VARIABLE_INITIALIZED, waitForState).stop);
       awaitingState = busy.value;
       // Browser fullscreen starts only from a click; preserve it across latest-message iframe replacement.
-      if (!nativeMode && (mode.value === 'panel' || isReaderFullscreen())) await acquire();
+      if (!nativeMode && isReaderFullscreen()) await acquire();
       else { refresh(); waitForState(); }
       armSendTimeout();
       const processor = context().streamingProcessor as Stream | null;
@@ -607,5 +590,5 @@ export function useNvl() {
     }, 2000);
     host.document.documentElement.setAttribute('data-dlnm-fullscreen-cleanup', String(cleanup));
   });
-  return { pages: readingPages, selectedId, snapshot, stateMessageId, draft, busy, connected, opening, canSend, error, chatKey, hosted, mode, surfaceTarget, following, select, follow, send, stop, refresh: retryState, toggleHost };
+  return { pages: readingPages, selectedId, snapshot, stateMessageId, draft, busy, connected, opening, canSend, error, chatKey, hosted, superseded, surfaceTarget, following, select, follow, send, stop, refresh: retryState, toggleHost };
 }

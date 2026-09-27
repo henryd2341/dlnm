@@ -1,7 +1,7 @@
 // Optional after explicit test permission: node scripts/check-nvl.ts
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { pagesFromMessages, pagesWithWaiting, visibleBody, type WaitingTurn } from '../src/nvl.ts';
+import { displayStateId, pagesFromMessages, pagesWithWaiting, visibleBody, type WaitingTurn } from '../src/nvl.ts';
 
 const message = (message_id: number, role: ChatMessage['role'], text: string, is_hidden = false): ChatMessage =>
   ({ message_id, role, name: role, message: text, is_hidden, data: {}, extra: {} });
@@ -74,8 +74,8 @@ assert.match(runtime, /if \(connected\.value && !closed\) refresh\(\)/);
 assert.match(runtime, /detail: ownerToken/);
 assert.doesNotMatch(runtime, /detail: frame\.id|detail !== frame\.id/);
 assert.match(runtime, /stopFailed = !context\(\)\.stopGeneration\(\)/);
-assert.match(runtime, /if \(selectedId\.value < 0\)/);
-assert.match(runtime, /if \(selectedId\.value === WAITING_PAGE\) return/);
+assert.match(runtime, /if \(displayId < 0\)/);
+assert.match(runtime, /if \(statePageId\(\) === WAITING_PAGE\) return/);
 assert.doesNotMatch(runtime, /\b(?:createChatMessages|setChatMessages|replaceVariables|updateVariablesWith)\s*\(/);
 const send = runtime.slice(runtime.indexOf('  function send()'), runtime.indexOf('  function armSendTimeout()'));
 assert.ok(send.indexOf('waitingTurn.value =') < send.indexOf('button.click()'));
@@ -92,4 +92,28 @@ assert.match(view, /revision === scrollRevision/);
 assert.match(view, /已发送，等待回复/);
 assert.match(view, /已等待 \{\{ waitingSeconds \}\} 秒/);
 assert.match(view, /clearInterval\(waitingClock\)/);
+// N3: current status in light UI must not overwrite the separate historical reading selection.
+assert.equal(displayStateId(pages, 0, true), 0);
+assert.equal(displayStateId(pages, 0, false), 5);
+assert.equal(displayStateId(waiting, 0, false), -2);
+assert.equal(displayStateId(waiting, 0, true), 0);
+assert.equal(displayStateId([], 0, false), -1);
+assert.match(runtime, /saved\.mode === 'panel' \|\| saved\.mode === 'light'/);
+assert.match(runtime, /if \(!nativeMode && isReaderFullscreen\(\)\) await acquire\(\)/);
+assert.doesNotMatch(runtime, /data-dlnm-nvl-(?:chat|frame|row|input)|--dlnm-reader-height|ResizeObserver/);
+assert.match(runtime, /superseded\.value = true; retire\(\)/);
+const entry = readFileSync(new URL('../src/StateCard.vue', import.meta.url), 'utf8');
+assert.match(entry, /!hosted && !superseded/);
+assert.match(entry, /<CharacterStatus/);
+assert.match(view, /<CharacterStatus/);
+assert.doesNotMatch(entry, /<textarea|scene-placeholder|history-menu|面板模式/);
+assert.doesNotMatch(view, /change-mode|面板模式/);
+const status = readFileSync(new URL('../src/CharacterStatus.vue', import.meta.url), 'utf8');
+const statusTemplate = status.slice(status.indexOf('<template>'), status.indexOf('</template>'));
+const folded = [...statusTemplate.matchAll(/<details\b[^>]*>[\s\S]*?<\/details>/g)].map(match => match[0]);
+assert.equal(folded.length, 3);
+assert.ok(folded.every(part => !/<meter|<details[^>]*\bopen\b/.test(part)));
+assert.equal([...statusTemplate.matchAll(/<meter\b/g)].length, 2);
+assert.match(status, /repeat\(auto-fit, minmax\(min\(100%, 20rem\), 1fr\)\)/);
+assert.doesNotMatch(status, /eventOn|watch\(|v-html|replaceVariables/);
 console.log('NVL message projection checks passed; no host or UI acceptance implied.');

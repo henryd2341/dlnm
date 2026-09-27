@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import CharacterStatus from './CharacterStatus.vue';
 import type { State } from './mvu/schema.ts';
 import type { NvlPage } from './nvl.ts';
 import { createMessageRenderer } from './message-display.ts';
@@ -16,8 +17,6 @@ const props = defineProps<{
   canSend: boolean;
   error: string;
   chatKey: string;
-  hosted: boolean;
-  mode: 'fullscreen' | 'panel';
 }>();
 
 const emit = defineEmits<{
@@ -28,7 +27,6 @@ const emit = defineEmits<{
   stop: [];
   refresh: [];
   'toggle-host': [];
-  'change-mode': [mode: 'fullscreen' | 'panel'];
 }>();
 
 const reading = ref<HTMLElement | null>(null);
@@ -64,34 +62,6 @@ const renderedBody = computed(() => {
   try { return { html: renderMessage.value(selectedPage.value?.text ?? ''), error: '' }; }
   catch { return { html: '', error: '正文格式转换失败，原文保留；请检查宿主 Markdown 与清理组件。' }; }
 });
-
-const traitGroups = computed(() => props.snapshot ? [
-  {
-    label: '技能', color: '橙', items: [
-      ['清洁', props.snapshot.noa.cleaning, 1000],
-      ['料理', props.snapshot.noa.cooking, 1000],
-      ['洗涤', props.snapshot.noa.laundry, 1000],
-    ],
-  },
-  {
-    label: '教养', color: '蓝', items: [
-      ['礼仪', props.snapshot.noa.etiquette, 1000],
-      ['知识', props.snapshot.noa.knowledge, 1000],
-    ],
-  },
-  {
-    label: '人格', color: '绿', items: [
-      ['魅力', props.snapshot.noa.charm, 1000],
-      ['亲爱', props.snapshot.noa.affection, 1000],
-    ],
-  },
-  {
-    label: '本能', color: '红', items: [
-      ['感度', props.snapshot.noa.sensitivity, 1000],
-      ['欲求', props.snapshot.noa.desire, 100],
-    ],
-  },
-] as const : []);
 
 function storageKey(key: string) {
   return `dlnm:nvl-scroll:${key}`;
@@ -137,14 +107,6 @@ function restorePosition(key: string) {
 function selectRelative(offset: number) {
   const page = props.pages[selectedIndex.value + offset];
   if (page) emit('select', page.id);
-}
-
-function hasColor(color: string) {
-  return props.snapshot?.noa.colors.some(value => value === color || value === `${color}色`) ?? false;
-}
-
-function meterWidth(value: number, maximum: number) {
-  return `${Math.max(0, Math.min(100, value / maximum * 100))}%`;
 }
 
 function onDraft(event: Event) {
@@ -203,7 +165,6 @@ onBeforeUnmount(() => { savePosition(); clearInterval(waitingClock); });
       </dl>
       <div class="header-actions">
         <span class="connection" :class="{ online: connected }">{{ connected ? '宿主已连接' : '宿主未连接' }}</span>
-        <button type="button" @click="emit('change-mode', mode === 'fullscreen' ? 'panel' : 'fullscreen')">{{ mode === 'fullscreen' ? '面板模式' : '浏览器全屏阅读' }}</button>
         <button type="button" :disabled="!connected" @click="emit('toggle-host')">返回酒馆</button>
         <button type="button" @click="emit('refresh')">重新读取</button>
       </div>
@@ -214,55 +175,7 @@ onBeforeUnmount(() => { savePosition(); clearInterval(waitingClock); });
     </p>
 
     <div class="nvl-stage">
-      <details class="character-panel" open>
-        <summary>人物与状态</summary>
-        <div v-if="snapshot" class="character-list">
-          <small class="state-source">状态来源：消息 {{ stateMessageId ?? '未标记' }}</small>
-          <section class="character-card" aria-labelledby="noa-name">
-            <div class="portrait portrait-noa" role="img" aria-label="诺雅头像占位">
-              <span>头像占位</span><b>诺雅</b>
-            </div>
-            <div class="character-body">
-              <h2 id="noa-name">诺雅</h2>
-              <div class="primary-meter">
-                <span>体力</span><b>{{ snapshot.noa.stamina }} / 100</b>
-                <i><i :style="{ width: meterWidth(snapshot.noa.stamina, 100) }"></i></i>
-              </div>
-              <div v-for="group in traitGroups" :key="group.label" class="trait-group">
-                <h3 :class="['color-label', `tone-${group.color}`, { active: hasColor(group.color) }]">
-                  {{ group.label }} · {{ group.color }}
-                </h3>
-                <dl>
-                  <div v-for="item in group.items" :key="item[0]">
-                    <dt>{{ item[0] }}</dt><dd>{{ item[1] }} / {{ item[2] }}</dd>
-                  </div>
-                </dl>
-              </div>
-              <p class="colors">已获得颜色：{{ snapshot.noa.colors.length ? snapshot.noa.colors.join('、') : '暂无' }}</p>
-            </div>
-          </section>
-
-          <section class="character-card" aria-labelledby="lilixia-name">
-            <div class="portrait portrait-lilixia" role="img" aria-label="莉莉希雅头像占位">
-              <span>头像占位</span><b>莉莉希雅</b>
-            </div>
-            <div class="character-body">
-              <h2 id="lilixia-name">莉莉希雅</h2>
-              <div class="primary-meter">
-                <span>魔力</span><b>{{ snapshot.lilixia.mana }} / 100</b>
-                <i><i :style="{ width: meterWidth(snapshot.lilixia.mana, 100) }"></i></i>
-              </div>
-              <dl class="description-list">
-                <div><dt>外貌</dt><dd>{{ snapshot.lilixia.appearance }}</dd></div>
-                <div><dt>服装</dt><dd>{{ snapshot.lilixia.clothing }}</dd></div>
-                <div><dt>神态</dt><dd>{{ snapshot.lilixia.expression }}</dd></div>
-                <div><dt>状态</dt><dd>{{ snapshot.lilixia.condition }}</dd></div>
-              </dl>
-            </div>
-          </section>
-        </div>
-        <p v-else class="empty-state" role="status">当前回复没有通过校验的有效状态数据。</p>
-      </details>
+      <CharacterStatus class="character-panel" :snapshot="snapshot" :state-message-id="stateMessageId" />
 
       <section class="reader-column" aria-label="当前阅读内容">
         <div ref="reading" class="reading-scroll" tabindex="0" @scroll.passive="onScroll">
@@ -445,37 +358,7 @@ textarea:focus-visible,
   background: var(--line);
 }
 
-.character-panel { min-height: 0; overflow: auto; background: #121212; }
-.character-panel > summary { display: block; padding: .7rem 1rem; cursor: pointer; }
-.character-list { padding: .9rem; display: grid; gap: .9rem; }
-.state-source { color: var(--muted); }
-.character-card { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: .8rem; padding: .75rem; border: 1px solid #393939; background: #1c1c1c; }
-.portrait { position: relative; height: 116px; display: grid; place-content: center; overflow: hidden; border: 1px solid #6a6863; background: linear-gradient(135deg, #555, #151515 70%); text-align: center; }
-.portrait::before { content: ""; width: 34px; height: 34px; margin: auto; border: 2px solid #a5a39e; border-radius: 50%; }
-.portrait::after { content: ""; width: 58px; height: 48px; margin-top: -2px; border: 2px solid #888681; border-bottom: 0; border-radius: 50% 50% 0 0; }
-.portrait span { position: absolute; inset: .2rem .2rem auto; color: #ccc; font-size: .62rem; letter-spacing: .08em; }
-.portrait b { position: absolute; inset: auto 0 0; padding: .2rem; background: #111d; font-size: .76rem; }
-.portrait-lilixia { background: linear-gradient(215deg, #717171, #1b1b1b 68%); }
-.character-body { min-width: 0; }
-.character-body h2 { margin: 0 0 .4rem; font-size: 1rem; }
-.primary-meter { display: grid; grid-template-columns: 1fr auto; gap: 0 .4rem; font-size: .78rem; }
-.primary-meter > i { grid-column: 1 / -1; height: 5px; overflow: hidden; background: #4a4a4a; }
-.primary-meter > i > i { display: block; height: 100%; background: #dedbd5; }
-.trait-group { margin-top: .65rem; }
-.trait-group h3 { margin: 0 0 .2rem; padding-left: .45rem; border-left: 4px solid #747474; color: #aaa; font-size: .72rem; }
-.trait-group dl,
-.description-list { margin: 0; font-size: .73rem; }
-.trait-group dl div,
-.description-list div { display: flex; justify-content: space-between; gap: .5rem; border-bottom: 1px dotted #3c3c3c; }
-.trait-group dd,
-.description-list dd { margin: 0; text-align: right; }
-.description-list dd { max-width: 65%; }
-.color-label.active.tone-橙 { border-color: #d68135; color: #e6a15f; }
-.color-label.active.tone-蓝 { border-color: #4f83ae; color: #80acd0; }
-.color-label.active.tone-绿 { border-color: #568b61; color: #83b18b; }
-.color-label.active.tone-红 { border-color: #a94f48; color: #d57a72; }
-.colors { margin: .55rem 0 0; color: var(--muted); font-size: .7rem; }
-.empty-state { margin: 1rem; padding: 1rem; border: 1px solid #555; color: var(--muted); }
+.character-panel { min-width: 0; min-height: 0; overflow: auto; background: #121212; }
 
 .reader-column { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; background: #0e0e0e; }
 .reading-scroll { position: relative; min-height: 0; display: grid; overflow: auto; isolation: isolate; scrollbar-color: #777 #222; }
@@ -543,16 +426,8 @@ footer { padding: .25rem max(.7rem, env(safe-area-inset-right)) max(.25rem, env(
   .scene-meta dd { font-size: .78rem; }
   .header-actions { justify-content: flex-end; flex-wrap: wrap; }
   .connection { flex-basis: 100%; text-align: right; }
-  .nvl-stage { display: flex; flex-direction: column; min-height: 0; }
-  .character-panel { flex: 0 0 auto; max-height: min(38dvh, 45%); border-bottom: 1px solid var(--line); overflow: auto; }
-  .character-panel:not([open]) { overflow: hidden; }
-  .character-panel > summary { position: sticky; top: 0; z-index: 4; display: flex; align-items: center; background: #181818; }
-  .character-panel > summary::after { content: "收起"; margin-left: auto; color: var(--muted); font-size: .75rem; }
-  .character-panel:not([open]) > summary::after { content: "展开"; }
-  .character-list { grid-template-columns: repeat(2, minmax(260px, 1fr)); overflow-x: auto; padding: .65rem; }
-  .state-source { grid-column: 1 / -1; }
-  .character-card { min-width: 260px; }
-  .reader-column { flex: 1 1 auto; min-height: 0; }
+  .nvl-stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, auto) minmax(160px, 1fr); min-height: 0; }
+  .character-panel { max-height: 32dvh; border-bottom: 1px solid var(--line); overflow: auto; }
   .scene-placeholder { min-height: 430px; }
   .nvl-page { width: min(100% - 1rem, 720px); padding: 1.2rem 0 2.4rem; }
   .prompt-block { max-width: 90%; margin-bottom: 1rem; }
@@ -574,9 +449,6 @@ footer { padding: .25rem max(.7rem, env(safe-area-inset-right)) max(.25rem, env(
   .brand p { display: none; }
   .header-actions button { padding-inline: .55rem; }
   .scene-meta { font-size: .72rem; }
-  .character-list { grid-template-columns: 1fr; overflow-x: visible; }
-  .character-card { min-width: 0; grid-template-columns: 70px minmax(0, 1fr); }
-  .portrait { height: 102px; }
   .reply-markdown, .plain-reply { font-size: 1rem; }
   .reading-nav > button { padding-inline: .65rem; }
   .composer { grid-template-columns: minmax(0, 1fr) 96px; }
