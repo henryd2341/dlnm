@@ -112,8 +112,15 @@ const status = readFileSync(new URL('../src/CharacterStatus.vue', import.meta.ur
 const statusTemplate = status.slice(status.indexOf('<template>'), status.indexOf('</template>'));
 const folded = [...statusTemplate.matchAll(/<details\b[^>]*>[\s\S]*?<\/details>/g)].map(match => match[0]);
 assert.equal(folded.length, 3);
-assert.ok(folded.every(part => !/<meter|<details[^>]*\bopen\b/.test(part)));
+assert.ok(folded.every(part => !/<meter|<CardImage|<details[^>]*\bopen\b/.test(part)));
 assert.equal([...statusTemplate.matchAll(/<meter\b/g)].length, 2);
-assert.match(status, /repeat\(auto-fit, minmax\(min\(100%, 20rem\), 1fr\)\)/);
+assert.match(status, /@container \(min-width: 30rem\)/);
+assert.match(status, /repeat\(2, minmax\(0, 1fr\)\)/);
+assert.equal([...statusTemplate.matchAll(/<CardImage\b/g)].length, 4);
+for (const name of ['塞拉菲娜', '狸猫']) {
+  const card = statusTemplate.match(new RegExp(`<section class="character-card" aria-label="${name}的状态">[\\s\\S]*?<\\/section>`))?.[0];
+  assert.ok(card);
+  assert.doesNotMatch(card, /<details|<meter/);
+}
 assert.doesNotMatch(status, /eventOn|watch\(|v-html|replaceVariables/);
 console.log('NVL message projection checks passed; no host or UI acceptance implied.');

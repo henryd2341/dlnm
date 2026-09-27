@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import CharacterStatus from './CharacterStatus.vue';
+import CardImage from './CardImage.vue';
+import { sceneImage } from './images.ts';
 import type { State } from './mvu/schema.ts';
 import type { NvlPage } from './nvl.ts';
 import { createMessageRenderer } from './message-display.ts';
@@ -17,6 +19,7 @@ const props = defineProps<{
   canSend: boolean;
   error: string;
   chatKey: string;
+  imageRevision: number;
 }>();
 
 const emit = defineEmits<{
@@ -41,6 +44,7 @@ let scrollRevision = 0;
 const selectedIndex = computed(() => props.pages.findIndex(page => page.id === props.selectedId));
 const selectedPage = computed(() => selectedIndex.value < 0 ? null : props.pages[selectedIndex.value]);
 const latestPage = computed(() => props.pages[props.pages.length - 1] ?? null);
+const scene = computed(() => sceneImage(props.snapshot?.world));
 const positionKey = computed(() => selectedPage.value
   ? `${props.chatKey}:${selectedPage.value.viewKey ?? `${selectedPage.value.id}:${selectedPage.value.swipe}`}`
   : `${props.chatKey}:empty`);
@@ -175,20 +179,12 @@ onBeforeUnmount(() => { savePosition(); clearInterval(waitingClock); });
     </p>
 
     <div class="nvl-stage">
-      <CharacterStatus class="character-panel" :snapshot="snapshot" :state-message-id="stateMessageId" />
+      <CharacterStatus class="character-panel" :snapshot="snapshot" :state-message-id="stateMessageId" :chat-key="chatKey" :image-revision="imageRevision" />
 
       <section class="reader-column" aria-label="当前阅读内容">
         <div ref="reading" class="reading-scroll" tabindex="0" @scroll.passive="onScroll">
-          <div class="scene-placeholder" aria-label="宅邸与月光城市场景占位">
-            <svg viewBox="0 0 1000 620" aria-hidden="true">
-              <path d="M0 0h1000v620H0z" fill="#151515" />
-              <path d="M80 70h360v330H80zM115 105h135v120H115zM270 105h135v120H270z" fill="none" stroke="#777" stroke-width="8" />
-              <path d="M250 70v330M80 245h360M0 470h1000M545 390h300l70 80H475zM600 470v90M800 470v90" fill="none" stroke="#777" stroke-width="8" />
-              <path d="M690 90l45 65-45 65-45-65zM865 60v250M835 105h60M830 150h70M825 195h80" fill="none" stroke="#a7a7a7" stroke-width="7" />
-              <circle cx="185" cy="165" r="46" fill="#d6d6d6" opacity=".75" />
-            </svg>
-            <span>宅邸 / 瑟雷妮亚场景占位</span>
-          </div>
+          <CardImage class="scene-background" scene :names="scene.names" :note="scene.note"
+            :label="snapshot?.world.location ?? '场景'" :chat-key="chatKey" :revision="imageRevision" />
 
           <article v-if="selectedPage" class="nvl-page">
             <section class="prompt-block" aria-label="本轮玩家输入">
@@ -267,7 +263,7 @@ onBeforeUnmount(() => { savePosition(); clearInterval(waitingClock); });
       </div>
     </section>
 
-    <footer>P2 NVL 界面原型 · 人物头像与宅邸 / 城市场景均为标注占位素材 · 待桌面与手机手动验收</footer>
+    <footer>N4 · 图片来源见图下注记 · 四人状态跟随已保存消息 · 待桌面与手机手动验收</footer>
   </main>
 </template>
 
@@ -353,7 +349,7 @@ textarea:focus-visible,
   grid-row: 3;
   min-height: 0;
   display: grid;
-  grid-template-columns: clamp(280px, 27vw, 380px) minmax(0, 1fr);
+  grid-template-columns: clamp(30rem, 40vw, 40rem) minmax(0, 1fr);
   gap: 1px;
   background: var(--line);
 }
@@ -362,13 +358,10 @@ textarea:focus-visible,
 
 .reader-column { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; background: #0e0e0e; }
 .reading-scroll { position: relative; min-height: 0; display: grid; overflow: auto; isolation: isolate; scrollbar-color: #777 #222; }
-.scene-placeholder,
+.scene-background,
 .nvl-page,
 .empty-reader { grid-area: 1 / 1; }
-.scene-placeholder { position: relative; z-index: 0; width: 100%; height: 100%; min-height: 520px; filter: grayscale(1); background: #151515; }
-.scene-placeholder::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #050505e8 0%, #111b 48%, #050505eb 100%), linear-gradient(0deg, #060606de, transparent 45%, #090909c7); }
-.scene-placeholder svg { position: sticky; top: 0; width: 100%; height: min(100%, 100dvh); min-height: 520px; object-fit: cover; }
-.scene-placeholder span { position: absolute; z-index: 1; top: .7rem; right: .8rem; padding: .18rem .4rem; border: 1px solid #777; color: #ccc; background: #111c; font-size: .65rem; letter-spacing: .08em; }
+.scene-background { z-index: 0; width: 100%; }
 .nvl-page { position: relative; z-index: 1; width: min(820px, calc(100% - 2rem)); min-height: 100%; margin: 0 auto; padding: clamp(2.2rem, 7vh, 5rem) 0 4rem; }
 .prompt-block { margin: 0 0 2rem auto; max-width: 76%; padding: .75rem 1rem; border-right: 3px solid #aaa; text-align: right; background: #111c; }
 .prompt-block b { color: #bdbab4; font-size: .78rem; letter-spacing: .14em; }
@@ -428,7 +421,6 @@ footer { padding: .25rem max(.7rem, env(safe-area-inset-right)) max(.25rem, env(
   .connection { flex-basis: 100%; text-align: right; }
   .nvl-stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, auto) minmax(160px, 1fr); min-height: 0; }
   .character-panel { max-height: 32dvh; border-bottom: 1px solid var(--line); overflow: auto; }
-  .scene-placeholder { min-height: 430px; }
   .nvl-page { width: min(100% - 1rem, 720px); padding: 1.2rem 0 2.4rem; }
   .prompt-block { max-width: 90%; margin-bottom: 1rem; }
   .reply-block { padding: 1rem; }

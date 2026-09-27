@@ -37,7 +37,7 @@ export function beginBatch(variables: Variables, commands: Command[], message: s
     patches.forEach((patch, index) => {
       if (JSON.stringify(patchSchema.parse(JSON.parse(commands[index]!.full_match))) !== JSON.stringify(patch)) throw Error('混入其他更新命令');
       if (patch.op === 'insert') {
-        if (patch.path !== '/noa/colors/-') throw Error('仅允许追加颜色');
+        if (patch.path !== '/noah/colors/-') throw Error('仅允许追加颜色');
         z.string().refine(value => value.trim().length > 0 && [...value].length <= 16).parse(patch.value);
       } else {
         const field = fields.get(patch.path);

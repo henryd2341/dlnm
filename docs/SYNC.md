@@ -53,9 +53,17 @@ HTTP 顺序固定为：获取当前请求的 CSRF token → 覆盖指定世界�
 
 `npm run dev` 仍只服务 `dist`；卡文本留在 `artifacts`，不随资源服务公开。当前仅本机可达，手机的 `127.0.0.1` 指手机自己，局域网地址配置留到相应阶段。
 
+## N4 更新注意
+
+- 当前 Schema 是 `world/noah/lilicia/seraphina/tanuki` 共 24 字段。此次涉及 Schema/世界书，执行 `npm run sync:push` 后新建聊天；只刷新前端还未更新卡内旧 Schema。旧聊天不迁移、重置或删除。
+- `delivery.config.mjs` 的 `imageSource` 明确选择 `development` 或 `gremlin`。默认开发来源只服务55张选用的哈希副本；正式来源只读用户自行安装的 Illustration-Gremlin 当前卡图包，绝不回退 public。
+- 若用环境变量覆盖，在同一 PowerShell 中先 `$env:DLNM_IMAGE_SOURCE='gremlin'`，然后执行构建或推送；以后每次构建同样保持该选择。长期使用可直接改配置。运行前端显示每张图的来源。
+- 导入、更新或删除图包后点击“重新读取状态与图片”。实际 API 没有公开图片变更事件；本卡省去额外轮询或猜测事件，不释放扩展拥有的共享 Blob URL。
+- 完整唯一名称清单、来源切换和 B1～B10 手验见 NEXT.md 的 N4 交付记录。本轮仅本地构建打包，没有真实推送或安装。
+
 ## 3. 本地 Git 备份
 
-- 本次改动前工作树干净，已有提交 `886753b`（`feat: light weighted plain status`）作为基线。额外标签写入请求未获执行，没有创建新标签或备份目录。
+- 前置同步阶段改动前工作树干净，当时提交 `886753b`（`feat: light weighted plain status`）作为基线。额外标签写入请求未获执行，没有创建新标签或备份目录。
 - 后续用本地 Git 提交维护源码版本；构建产物仍按项目现有规则忽略。Git 保存的是已提交源码，未提交改动和酒馆聊天存档不自动获得备份。
 - 回滚时恢复选定 Git 版本的源码再构建、推送。回退到接入同步前的版本时，该版本尚无本命令，需要使用它原有的打包/导入流程。
 - `live` 地址始终指向最近一次构建；旧 JSON 使用同一动态入口，不等于冻结旧前端。恢复旧前端应恢复相应源码再构建，而不是只换一个旧 JSON 文件。
@@ -67,4 +75,4 @@ HTTP 顺序固定为：获取当前请求的 CSRF token → 覆盖指定世界�
 - 世界书转换依据实际宿主的 `public/scripts/world-info.js` 中 `convertCharacterBook`。没有改动宿主源码、设置或认证。
 - 构建只证明本地编译和装配。首次推送、登录模式、资源异步执行、浏览器全屏、刷新后持久化仍待真实酒馆手验；代理本轮没有执行 POST、浏览器或模型操作。
 - `npm run check:sync` 是另行提供的可选本地检查，只使用内存请求替身，不接触酒馆；默认构建/推送不调用它，本轮按要求不运行测试、类型检查或 lint。
-- Library 路由：`sillytavern-card-pipeline`，快照 `2026-08-18`，采用 A0/A2/D1/D4 的对应边界；未采用设计候选。N4/N5 保持未实施。
+- Library 路由：`sillytavern-card-pipeline`，快照 `2026-08-18`，采用 A0/A2/D1/D4 的对应边界；未采用设计候选。N4 后续已实现并构建，证据见 NEXT.md；N5 保持未实施。

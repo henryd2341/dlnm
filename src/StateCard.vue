@@ -1,28 +1,31 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import NvlView from './NvlView.vue';
 import CharacterStatus from './CharacterStatus.vue';
 import { useNvl } from './nvl.ts';
 
 const { pages, selectedId, snapshot, stateMessageId, draft, busy, connected, canSend, error,
   chatKey, hosted, opening, superseded, surfaceTarget, following, select, follow, send, stop, refresh, toggleHost } = useNvl();
+const imageRevision = ref(0);
+function refreshAll() { imageRevision.value++; refresh(); }
 </script>
 
 <template>
   <Teleport :to="surfaceTarget || 'body'" :disabled="!surfaceTarget">
   <NvlView v-if="hosted" v-model:draft="draft"
     :pages="pages" :selected-id="selectedId" :snapshot="snapshot" :state-message-id="stateMessageId" :following="following"
-    :busy="busy" :connected="connected" :can-send="canSend" :error="error" :chat-key="chatKey"
-    @select="select" @follow="follow" @send="send" @stop="stop" @refresh="refresh" @toggle-host="toggleHost" />
+    :busy="busy" :connected="connected" :can-send="canSend" :error="error" :chat-key="chatKey" :image-revision="imageRevision"
+    @select="select" @follow="follow" @send="send" @stop="stop" @refresh="refreshAll" @toggle-host="toggleHost" />
   </Teleport>
   <section v-if="!hosted && !superseded" class="nvl-entry" aria-label="人物状态轻前端">
     <header>
       <strong>人物与状态</strong>
       <div class="entry-actions">
         <button type="button" :disabled="!connected || opening" @click="toggleHost">浏览器全屏阅读</button>
-        <button type="button" :disabled="!connected" @click="refresh">重新读取状态</button>
+        <button type="button" :disabled="!connected" @click="refreshAll">重新读取状态与图片</button>
       </div>
     </header>
-    <CharacterStatus :snapshot="snapshot" :state-message-id="stateMessageId" />
+    <CharacterStatus :snapshot="snapshot" :state-message-id="stateMessageId" :chat-key="chatKey" :image-revision="imageRevision" />
     <p v-if="error" role="status">{{ error }}</p>
   </section>
 </template>

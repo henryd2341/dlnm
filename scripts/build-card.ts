@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createCard } from '../src/card.ts';
 import { createLiveLoader } from './live-loader.mjs';
+import { expressionRules } from '../src/images.ts';
 import { assetBaseUrl, devOrigin, hostOrigins } from '../delivery.config.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -15,7 +16,9 @@ const schemaBundle = readFileSync(resolve(root, 'dist/schema.js'), 'utf8');
 const stateBundle = readFileSync(resolve(root, 'dist/state.js'), 'utf8');
 const stateCss = readFileSync(resolve(root, 'dist/state.css'), 'utf8');
 if (!schemaBundle.trim() || !stateBundle.trim() || !stateCss.trim()) throw Error('Build outputs are empty; run npm run build first');
-const version = createHash('sha256').update(JSON.stringify(['live-html-v1', base.href, schemaBundle, stateBundle, stateCss])).digest('hex').slice(0, 12);
+const imageManifestText = readFileSync(resolve(root, 'dist/image-manifest.json'), 'utf8');
+const imageManifest = JSON.parse(imageManifestText) as { source: 'development' | 'gremlin'; images: { name: string; source: string; path?: string; sha256?: string; bytes?: number }[] };
+const version = createHash('sha256').update(JSON.stringify(['live-html-n4', base.href, schemaBundle, stateBundle, stateCss, imageManifestText])).digest('hex').slice(0, 12);
 const runtime = `p2-${version}`;
 const schemaUrl = new URL(`${runtime}/schema.js`, base).href;
 const stateUrl = new URL(`${runtime}/state.js`, base).href;
@@ -36,107 +39,81 @@ const card = createCard({ schemaScript, loaderScript, stateHtml: createLiveLoade
 const content = JSON.stringify(card, null, 2) + '\n';
 const hash = createHash('sha256').update(content).digest('hex');
 const name = `dlnm-mvu-p2-dev-${hash.slice(0, 12)}`;
-const instructions = `# DLNM N3＋命令行同步与动态前端
+const instructions = `# DLNM N4 · 成品 B 候选
 
-## 本次变化（2026-09-27）
+## 交付状态
 
-本包只实现 N3，成品 A（含 A-R2）沿用用户已验收记录。非全屏默认显示扩宽人物状态栏，使用 CSS Grid 随可用消息宽度自动并排或堆叠。诺雅体力、莉莉希雅魔力条常显；头像、技能、教养、人格、本能、颜色、外貌与状态来源放在原生 &lt;details&gt; 中，默认折叠，点击或键盘展开。缺少有效 MVU 数据时明确提示，不填假数值。
+本包包含新聊天的 24 字段结构、四人图片状态栏、三处地点日夜背景和 Illustration-Gremlin 正式图片读取层。只完成本地源码、构建和打包；自动测试、typecheck、lint、浏览器、真实酒馆、模型调用与用户手验均未执行。N3/N4 合并交成品 B 手验，不预填通过。N5 世界书内容扩充保持后续。
 
-已删除旧面板入口及隐藏 chat/form 的样式；轻前端没有场景图、NVL 正文、历史导航或第二个输入框，原生正文与输入继续可用。浏览器全屏仍显示完整阅读页，并共用同一人物组件；返回/Escape 回到轻前端。轻前端显示最新回复的有效人物状态，全屏仍按阅读选择显示历史状态，历史选择和草稿保留。数据监听持续存在，不以打开全屏为前提。
-
-旧会话 mode: panel 仅映射为轻前端，不自动申请全屏，不清空草稿、等待状态或阅读位置。新 iframe 接管时旧人物栏退役；全屏内流式正文、发送等待和 MVU 保存链保留。详情在同一界面的数据刷新中保持展开状态；切换轻前端/全屏或重建 iframe 后按默认折叠。
-
-已有角色使用 npm run sync:push 更新：整本覆盖 NA 世界书，同时更新角色内容、正则与脚本。只在初次建立角色时使用导入 JSON；以后更新省去重复导入。卡版本字段仍为 p2-nvl-na，以文件名哈希识别新包。首次推送把旧卡的固定前端地址换成 ${liveHtmlUrl}，之后只修改前端时 npm run build，再刷新酒馆或重新渲染消息即可。已经打开的界面不会被强制中断或自动换代。
-
-本包是 N3 检查点，不是完整成品 B：头像与全屏场景仍为标注几何占位，N4 public/Illustration-Gremlin 和 N5 世界书扩充尚未实施。本轮仅构建打包与源码回读，自动测试、类型检查、lint、浏览器、真实酒馆和模型调用均未执行；N3 等待用户手验。
-
-## 1. 文件和启动
-
-- 导入卡：${resolve(root, `artifacts/${name}.json`)}
 - 卡版本：${card.data.character_version}；JSON SHA256：${hash}
-- 世界书：${card.data.character_book.name}（独立新名字，保留 R2 旧书）
-- 配套资源：${resolve(root, `dist/${runtime}`)} 下的 schema.js、state.js、state.css、state.html。ZIP 保留 ${runtime}/ 目录；恢复时放回项目 dist/，保留其他版本目录。
-- PowerShell 进入项目并启动 Vite：Set-Location -LiteralPath '${root.replaceAll("'", "''")}'; npm run dev
-- 地址：${devOrigin}/。保持终端开启，结束时 Ctrl+C；端口占用会报错，不自动换端口。
-- Vite 仅服务 dist 构建文件。前端改动：npm run build；卡内容/世界书/Schema/脚本/正则改动：npm run sync:push（先构建，再推送）。npm run pack 仅装配已有构建；上述命令均不串联测试。HTML 用固定地址异步读取，内含同一构建的 CSS 与固定版本 JS，避免样式和逻辑混版。
+- 本次图片来源：**${imageManifest.source === 'development' ? 'development：开发占位图' : 'gremlin：当前角色图包'}**
+- 卡 JSON：${resolve(root, `artifacts/${name}.json`)}
+- 配套资源：${resolve(root, `dist/${runtime}`)}，含 schema.js、state.js、state.css、state.html、image-manifest.json。
+- 固定 UI：${liveHtmlUrl}；本次固定 HTML：${htmlUrl}
+- 开发图仅在 dist/n4-images/，本次有 ${imageManifest.images.filter(image => image.path).length} 张按内容哈希命名的副本。原 public 保持原样；没有制作正式图包，交付 ZIP 不含这些临时图片。恢复本地开发图用同一项目的 npm run build。
 
-## 2. 首次接入与日常同步
+## 启动与更新
 
-1. 已有卡：按 ${resolve(root, 'docs/SYNC.md')} 配置准确的角色文件名，运行 npm run sync:push；新装才导入本 JSON。卡名仍为 DLNM-P1-香气链路，供既有脚本识别。本地源码以 Git 备份，不另建备份目录；Git 不包含酒馆聊天存档。
-2. 推送会整本覆盖并绑定 ${card.data.character_book.name}，按本地源码删除远端多余条目；这是明确选定的行为。若采用首次手动导入，仍需在酒馆导入并链接内嵌世界书。旧 R2 书和聊天消息保持原样。
-3. 确认本卡 3 条角色正则、2 项脚本启用；[initvar] 保持提示禁用。初值继续来自同一 19 字段 YAML，旧聊天和初始数值均不自动迁移。
-4. 保持已有 MVU、Schema 及酒馆助手路径正常；没有新增独立安装包或依赖库。宿主需要已有的 SillyTavern.libs.showdown/DOMPurify。缺组件时给出说明并显示原文，不插入未经清理的 HTML。
-5. 最新回复默认出现人物状态轻前端；点击“浏览器全屏阅读”才请求浏览器全屏，返回/Escape 回到轻前端。全屏功能未开放的浏览器继续使用原生聊天和人物状态。
+1. 在项目根目录运行 npm run dev，保持 ${devOrigin}/ 可访问；Vite 只服务 dist，不公开项目源码或整个 public。
+2. Schema 和世界书已破坏性升级。使用 docs/SYNC.md 的准确现有角色文件名，执行 npm run sync:push 后**新建聊天**；旧聊天不迁移、不重置、不删除。代理本轮没有执行推送。
+3. 初次建立角色才导入 JSON；已有卡用命令行同步。主世界书仍是 ${card.data.character_book.name}，按用户既定要求整本覆盖。保留 3 正则、2 脚本及 MVU 固定版本；[initvar] 提示禁用是正常设置。
+4. 纯前端以后 npm run build，再刷新酒馆或重新渲染消息。已打开的前端不强制中断。构建覆盖 dist/live/state.html 与 artifacts/dlnm-sync.json，历史固定目录保留。
+5. 重新读取状态与图片会重新列当前图包并获取 URL；导入、更新、删除图片后点击它。每次进入轻前端/全屏也重新取图。图片失败不阻断正文或人物数值。
 
-## 3. N3 手验与已验收功能回归
+## 图片来源与正式图包
 
-| 步骤 | 操作 | 预期 |
+delivery.config.mjs 的 imageSource 当前默认 development，环境变量 DLNM_IMAGE_SOURCE 可为某次构建覆盖为 gremlin。正式使用时把该配置设为 gremlin，再构建/同步；也可在同一 PowerShell 窗口执行 $env:DLNM_IMAGE_SOURCE='gremlin' 后执行 npm run sync:push。后续构建同样保持此来源选择，避免下一次构建恢复开发模式。
+
+正式模式请自行安装 [Illustration-Gremlin](https://github.com/pokerface-1224/Illustration-Gremlin)，为**当前整张 DLNM 卡**导入图包；四个人物都放在该卡图包中，用下面的唯一文件名区分，不是分别切换到四张角色卡。使用自备图片的副本整理名字，原图保留。
+
+- 诺雅示例：noah__blush_underwear.png；狸猫示例：tanuki__smile.png。
+- 缺扩展、OPFS 不可用或缺图会提示；正式分支完全不读取开发占位 URL。
+- listImages(current) 返回哪条 character/relativePath，就用该条精确取图。重名逻辑图提示修正，不借用其他目录或角色的 default。
+- 扩展按清洗后的**卡名**隔离，不是头像 ID；两张同名或清洗后同名的卡可能共享图包，使用时避免此类同名。
+- Blob URL 由扩展缓存和回收。本卡不将 URL 写入 MVU、聊天或会话，不在卸载时释放扩展共享 URL。图包修改会使旧 URL 失效，重新读取即可。
+- 本次源代码核对为 API v1.4.0 / commit 222150201c9cd3ab48435fc9b9221ed699d79e24；宿主安装、同源 iframe 和 OPFS 实际表现待手验。[固定 API 文档](https://github.com/pokerface-1224/Illustration-Gremlin/blob/222150201c9cd3ab48435fc9b9221ed699d79e24/API.md)
+- 未安装扩展、导入图包、创建远程仓库或发布。手机上的 127.0.0.1 是手机自身，本包未开放局域网，窄屏不等于手机网络可达。
+
+### 唯一图片名清单（${imageManifest.images.length} 项）
+
+清单也随资源提供 image-manifest.json；source 是开发参照，不代表正式素材资格。实际只引用四人 49 图和三处地点 6 图，其余背景不复制、不映射。
+
+| 唯一文件名 | 开发参照 |
+| --- | --- |
+${imageManifest.images.map(image => `| ${image.name} | public/${image.source} |`).join('\n')}
+
+## 规则与初值
+
+- noah 保留原 11 字段，新增 clothing=女仆服、expression=神态平静；lilicia 保留原五字段和初值（居家便服／神态放松）。
+- seraphina 只有 clothing=修女服，戴头纱、expression=神态平静；tanuki 只有 expression=神态平静。新文本沿用 1～120 字符范围。
+- 服装先匹配：诺雅/莉莉希雅含睡或内用 _underwear；塞拉菲娜含纱或巾用 _sisterveil；否则无后缀，狸猫省去服装判断。
+- 表情在该角色支持的规则中按下面顺序取第一个单字命中。smile 已移除微；微笑命中笑，微怒回 default。纯 includes 会把不喜欢匹配到 smile，因此变量直接描述当前状态，不混否定句或换装历史。
+- 图片逐级取目标表情＋服装、同衣 default、无后缀 default；全缺时文字占位。未知表情本就取 default；塞拉菲娜只有 default/smile，狸猫只有 default/sad/smile/surprised/worried。
+
+| 优先级 | 表情 | 单字命中 |
 | --- | --- | --- |
-| L1 默认轻前端 | 打开最新角色回复，不进入全屏 | 两条数值条常显，人物详情默认折叠；没有旧面板按钮、场景图、正文副本或第二发送框；原生正文/输入仍可用 |
-| L2 折叠与窄屏 | 用鼠标及 Tab/Enter 切换两名人物详情，在窄容器或手机查看 | 原生详情可开合、焦点可见；Grid 自动重排且长字段换行，无横向挤出；同实例状态刷新不重置展开 |
-| L3 全屏返回 | 反复进入全屏并点击返回或按 Escape | 真浏览器全屏正常开关，回到轻前端；没有遮挡、残留样式或重复人物栏 |
-| L4 当前与历史 | 全屏选一条旧回复后退出；在原生界面生成，再进入全屏 | 轻前端显示最新有效状态并自动更新，全屏仍保留历史选择/阅读位置；草稿保持，无变量倒写 |
-| L5 旧会话兼容 | 在保留旧草稿/历史选择的专用副本加载新包 | 旧 panel 会话进入轻前端，不触发自动全屏；草稿/阅读选择仍在；新旧 iframe 交接无第二栏 |
-| L6 异常与等待 | 按实际出现的待同步、停止或缺状态场景观察 | 必要提示常显；已保存状态带来源，缺数据不伪装成 0/100；修复保存后可自动回读 |
+${expressionRules.map(([expression, keys], index) => `| ${index + 1} | ${expression} | ${[...keys].join('、')} |`).join('\n')}
 
-下列 A/W 项为既有已验收功能的回归清单，不据此声明它们已在 N3 包逐项执行。
+宽区 2×2 按诺雅、莉莉希雅、塞拉菲娜、狸猫排列，窄区单列。头像框完整容纳图片并用边距统一大小；四张头像均在 details 外。诺雅体力、莉莉希雅魔力常显；两人其他字段可折叠。塞拉菲娜与狸猫没有数值条或 details，少量字段直接显示。人物状态来源保留独立折叠入口。
 
-以下操作由你决定是否执行；代理本轮没有代发消息或操作宿主。
+背景仅映射宅邸起居室/起居室/客厅、宅邸外观/宅邸门外/宅邸正门、宅邸走廊/走廊/廊道。清晨/上午/午后用 day，夜间/深夜用 night，傍晚用 night 并明确提示暂无黄昏图。未映射地点（包括城市）显示缺图状态，不沿用上一地点图片。
 
-发送等待回归（下列生成操作沿用你当前的模型设置，由你执行）：
+## 成品 B 手验（全部待执行）
 
-| 步骤 | 操作 | 预期 |
+| 编号 | 操作 | 预期 |
 | --- | --- | --- |
-| W1 发送到首字 | 在阅读页发送一句回应，观察首字前的等待 | 点击立即进入本轮；确认后显示等待秒数；首字在同一位置接上，仍为一次真实发送 |
-| W2 等待与历史 | 等待时回看上一轮，再返回最新；首字到达时也可停在历史 | 历史不被抢走；返回最新仍有等待提示或实际正文；人物数据没有提前变动 |
-| W3 停止与异常 | 首字前停止，或使用已出现的失败场景；核对酒馆实际消息 | 本轮保留并显示停止/尚无正文；未确认草稿保留；没有自动重发或假成功 |
-| W4 非流式与实例交接 | 在你选择的非流式模式观察等待；流式时保持全屏等待到首字 | 前者等到完整回复后替换提示，后者前端换代不丢等待状态；不新增空 AI 消息 |
-| W5 重生成/续写 | 从酒馆原生入口重生成或续写当前轮，再看阅读页 | 重生成仍是原轮，旧正文明确标注；新内容接入后替换；续写在原正文追加，无额外新轮 |
+| B1 | 同步后新建聊天 | 自动初始化五个顶层分组及 24 字段，四角可见；旧聊天无自动迁移/重置 |
+| B2 | 宽消息区、窄容器、全屏/退出 | 宽区2×2、窄区单列；头像完整；塞/狸没有数值条与details；诺/莉折叠不藏头像 |
+| B3 | 用变量编辑器在当前副本保存睡衣＋羞涩微笑、微怒、疲惫微笑 | 分别显示 blush_underwear、default、tired_smile；这是建议手验，代理未写宿主变量 |
+| B4 | 塞拉菲娜戴头纱/长发披散，狸猫忧虑/笑容 | 头纱服装正确切换；狸猫只按表情，无衣服后缀 |
+| B5 | 三地点、日夜、傍晚、未映射地点 | 对应背景/明确黄昏回退/缺图提示；轻前端始终无背景 |
+| B6 | 回看不同状态历史、切swipe、快速切聊天 | 图片来自所选已保存状态；旧异步返回不覆盖新画面；没有额外变量写回 |
+| B7 | 切gremlin构建，同步后缺扩展/缺图观察，再自行安装导图 | 缺失有提示且不读本机public；按当前卡唯一文件名取图 |
+| B8 | 缺目标表情、缺同衣default、全部缺图 | 依次按同角色规则回退并提示；正文、数值保持可用 |
+| B9 | 更新/删除/重新导入图包后重新读取，刷新与反复全屏 | 新图片可见，过期Blob不复用，不主动revoke破坏另一视图 |
+| B10 | 按已有A/W清单回归流式、非流式、等待、停止、Markdown/染色 | 原已验收链路保留；单独记录本包实际运行证据 |
 
-成品 A 与 A-R2 已获用户整体验收；N3 的 L1～L6 及相关回归仍待手验，不补造逐项运行记录。
-
-| 步骤 | 操作 | 预期 |
-| --- | --- | --- |
-| A1 流式 | 保留当前模型设置，在流式模式发送一条普通回应 | 文字随生成出现，末段/末字保留，无重复；技术尾块和前端加载器不混入正文 |
-| A2 非流式 | 在你选择的非流式设置再生成一轮 | 完成后正文自动刷新；MVU 保存后人物栏自动更新，无需“重新读取” |
-| A3 全屏接管 | 保持全屏连续生成，再返回/Escape 后用原生输入生成并重新进入 | 新消息 iframe 接管后保持全屏与样式；退出界面期间仍能同步最新内容 |
-| A4 历史/滚动 | 回看旧轮，或在最新长文中向上滚动；此时有新内容到达 | 不抢回最新/不强行滚到底；主动返回最新或滚到底后才继续跟随 |
-| A5 草稿/停止 | 草稿未发送时切轮/退出并重进全屏；生成中停止，或遇网络失败 | 已收正文和草稿保留，不自动重发；状态未确认时暂停下一轮；普通回复结束后正常同步 |
-| A6 分支/聊天 | 用酒馆原生界面换 swipe、编辑回复、重生成或切聊天 | 正文和状态回到当前真实楼层/分支；旧流式任务不覆盖新对象，草稿按聊天隔离 |
-| A7 Markdown/染色 | 在专用回复副本保留原 MVU 尾块，加入加粗、斜体、列表、引用、代码块、常规链接，以及 <span style="color: red">红色</span> 和 <span style="color: #9bc7ff">月光</span> | 实时与历史使用同一格式；代码中的标签保持字面；黑底可读；染色不改 noa.colors |
-| A8 清理/窄屏 | 在专用副本检查半截技术块、未闭合 span、带事件属性的标签及脚本/iframe文本，再看窄屏/长代码 | 技术块被隐藏；脚本、事件和 iframe 不执行；仅 span color 被保留；代码滚动和长链接不撑破布局 |
-
-请反馈未通过的编号、操作和实际表现。成品 A 通过后再继续 N3/N4；本包不宣称完整 P2/P3/P4/P5 验收。
-
-## 4. 实现与边界
-
-- 原生 STREAM_TOKEN_RECEIVED 是累计生成文本；续写只加一次既有前缀。临时正文按聊天、生成对象、消息及分支核对，用宿主浏览器帧合并刷新，不写聊天或 MVU。
-- 生成结束事件早于部分 MVU 写回；人物状态暂留上一份有效值，目标 CHARACTER_MESSAGE_RENDERED 到来后自动回读精确楼层/分支。可回读不等于磁盘保存已验证，刷新/重开仍留手验。
-- 退出阅读只释放显示层，不再卸掉消息监听；替换 iframe 或切聊天才退役旧监听与定时任务。宿主仍是消息、分支、生成和存档的唯一来源。
-- Markdown 使用宿主现有 Showdown 的基本选项，不调用会再次执行角色正则的 messageFormatting/formatAsDisplayedMessage；可能与酒馆个性化格式细节略有差别。
-- HTML 用宿主现有 DOMPurify 工厂的新实例处理，不改宿主全局 hooks。只保留基本排版和 http/https/mailto 链接；不保留图片、表单、脚本、iframe、事件属性或任意样式。
-- 合法链接固定在新标签打开，并带 noopener/noreferrer；模型自带的 target/rel 被替换，不导航走酒馆页面或消息 iframe。
-- span 只收不透明的命名色、#RGB/#RRGGBB、rgb()/hsl()，去掉 alpha、透明、var()/url() 等。过暗颜色为黑底阅读提亮；这是显示处理，不写回回复原文或颜色变量。
-- 当前人物/背景仍为几何占位，public 原图未打包，未安装 Illustration-Gremlin。本包已包含轻前端，正式图包仍留 N4。
-- 草稿和阅读位置只存当前浏览器会话；没有第二套聊天存档或跨设备同步。历史在事件稳定后线性读取，token 到来不重扫全部历史；长聊天性能尚未测量。
-- 未发送或未获酒馆确认的草稿保留；只有酒馆已创建文本一致的真实用户消息，才清空那一份已提交草稿。停止/失败不自动重发，已经送出的行动仍在真实聊天中，之后输入的新草稿保持。
-- 等待页是显示投影，负编号只用于前端选择，跳过消息与 MVU 读取接口；真实 pages 和聊天记录都不插入这张临时页。原生流式占位 ... 不被当作已收到正文，首个可见 token 或非流式真实正文才接管。
-- 原生 GENERATION_AFTER_COMMANDS 早于 MESSAGE_SENT；结束事件也可能早于最终渲染及停止事件。等待计时从实际消息确认起算，结束后延迟回读；“尚未收到正文”是观察结果，不宣称已判定网络故障。等待记录和计时只服务本轮反馈，不构成任务队列或第二套聊天存档。
-- 已补充可运行回归检查源码，但本轮未执行；浏览器清理、完整全屏交接、长聊天、真实手机、失败恢复仍待手验。
-
-## 5. 资源和地址
-
-卡内含 ${card.data.character_book.entries.length} 个世界书条目、3 条正则、2 项脚本。资源：
-- Schema：${schemaUrl}
-- 界面：${stateUrl}
-- 样式：${styleUrl}（同份编译 CSS 已封装进 HTML）
-- 固定 HTML 入口：${liveHtmlUrl}（实际使用仍需要酒馆助手消息 iframe 上下文）
-- 本次 HTML 内容：${htmlUrl}；CSS 随 HTML 一起更新，卡里只保留小型异步加载器
-- MVU 和 Zod 注册沿用固定提交 CDN；本包不是全离线包。
-
-地址由 ${resolve(root, 'delivery.config.mjs')} 管理，允许的酒馆来源：${hostOrigins.join('、')}。
-当前仅监听电脑 127.0.0.1；手机同名地址指手机自己，本次未开放局域网。窄屏检查不等于真实手机资源可达。
-没有创建远程仓库、部署或发布；改前源码以本地 Git 提交 886753b 留存，新包和旧包分别保留。推送命令按用户要求没有内容差异检查、回读校验或自动备份。
+本次提供 scripts/check-images.ts 及更新过的 Schema/bridge/card/NVL 检查源码，均未运行。构建输出与源代码回读仅是离线证据，实际 CSS、宿主加载、图片解码、历史/切卡竞态、保存恢复与手机仍待手验。改前已提交源码基线为 59b6c36；不另建备份目录，不自动提交。
 `;
 // Immutable checkpoints: allow identical re-packs, stop on any content collision.
 const outputs = new Map([
@@ -144,6 +121,7 @@ const outputs = new Map([
   [`dist/${runtime}/state.js`, stateBundle],
   [`dist/${runtime}/state.css`, stateCss],
   [`dist/${runtime}/state.html`, stateHtml],
+  [`dist/${runtime}/image-manifest.json`, imageManifestText],
   [`artifacts/${name}.md`, instructions],
   [`artifacts/${name}.json`, content],
 ]);

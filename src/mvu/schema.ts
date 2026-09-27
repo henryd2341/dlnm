@@ -13,7 +13,7 @@ export const Schema = z.strictObject({
     period: z.enum(['清晨', '上午', '午后', '傍晚', '夜间', '深夜']),
     location: boundedText(80),
   }),
-  noa: z.strictObject({
+  noah: z.strictObject({
     stamina: boundedInteger(100),
     cleaning: boundedInteger(1000),
     cooking: boundedInteger(1000),
@@ -25,13 +25,22 @@ export const Schema = z.strictObject({
     sensitivity: boundedInteger(1000),
     desire: boundedInteger(100),
     colors: z.array(colorName).transform(colors => [...new Set(colors)]),
+    clothing: boundedText(120),
+    expression: boundedText(120),
   }),
-  lilixia: z.strictObject({
+  lilicia: z.strictObject({
     mana: boundedInteger(100),
     appearance: boundedText(120),
     clothing: boundedText(120),
     expression: boundedText(120),
     condition: boundedText(120),
+  }),
+  seraphina: z.strictObject({
+    clothing: boundedText(120),
+    expression: boundedText(120),
+  }),
+  tanuki: z.strictObject({
+    expression: boundedText(120),
   }),
 });
 
@@ -39,7 +48,7 @@ export type State = z.infer<typeof Schema>;
 
 export const initialState: State = {
   world: { day: 1, period: '上午', location: '宅邸起居室' },
-  noa: {
+  noah: {
     stamina: 100,
     cleaning: 60,
     cooking: 60,
@@ -51,12 +60,21 @@ export const initialState: State = {
     sensitivity: 40,
     desire: 0,
     colors: ['红', '绿', '蓝', '橙'],
+    clothing: '女仆服',
+    expression: '神态平静',
   },
-  lilixia: {
+  lilicia: {
     mana: 100,
     appearance: '平日模样',
     clothing: '居家便服',
     expression: '神态放松',
     condition: '无明显不适',
+  },
+  seraphina: {
+    clothing: '修女服，戴头纱',
+    expression: '神态平静',
+  },
+  tanuki: {
+    expression: '神态平静',
   },
 };

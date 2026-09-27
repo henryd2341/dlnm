@@ -32,7 +32,7 @@ check('V2 card and declared world binding shape', () => {
   assert.equal(data.name, 'DLNM-P1-香气链路');
   assert.ok(Array.isArray(book.entries));
   assert.equal(data.extensions.world, book.name);
-  assert.match(data.creator_notes, /不代表宿主已完成世界书链接/);
+  assert.match(data.creator_notes, /构建交付不代表宿主\/用户验收/);
 });
 
 check('initvar is disabled YAML generated from the shared initial state', () => {
@@ -80,21 +80,31 @@ check('state entry uses only the registered read-only macro', () => {
 });
 
 check('field rules cover every initial-state leaf without duplicating initial JSON', () => {
-  const content = book.entries.find(item => item.comment.includes('19 字段'))!.content;
+  const content = book.entries.find(item => item.comment.includes('24 字段'))!.content;
   const paths: string[] = [];
   for (const [group, values] of Object.entries(initialState)) {
     for (const field of Object.keys(values)) paths.push(`${group}.${field}`);
   }
-  assert.equal(paths.length, 19);
+  assert.equal(paths.length, 24);
   for (const path of paths) assert.match(content, new RegExp(path.replace('.', '\\.')));
   assert.doesNotMatch(content, /"stamina"\s*:\s*100/);
+});
+
+check('observable appearance rules stay narrow and do not force supporting cast into every turn', () => {
+  const content = book.entries.find(item => item.comment.includes('24 字段'))!.content;
+  assert.match(content, /当前可观察状态/);
+  assert.match(content, /“睡、内”交给 underwear/);
+  assert.match(content, /“纱、巾”交给 sisterveil/);
+  assert.match(content, /smile 只匹配“喜、欢、乐、笑”，不匹配“微”/);
+  assert.match(content, /不得把“微怒”写成“微笑”/);
+  assert.match(content, /不强迫塞拉菲娜或狸猫每轮进入剧情/);
 });
 
 check('output contract includes empty, delta, replace and insert JSONPatch examples', () => {
   const content = book.entries.find(item => item.comment.includes('JSONPatch'))!.content;
   assert.match(content, /<UpdateVariable><Analyze>[\s\S]+<JSONPatch>\[\]<\/JSONPatch><\/UpdateVariable>/);
   for (const operation of ['delta', 'replace', 'insert']) assert.match(content, new RegExp(`"op":"${operation}"`));
-  assert.match(content, /"path":"\/noa\/colors\/-"/);
+  assert.match(content, /"path":"\/noah\/colors\/-"/);
   const examples = [...content.matchAll(/<UpdateVariable>[\s\S]*?<\/UpdateVariable>/g)].map(match => match[0]);
   assert.equal(examples.length, 4);
   for (const example of examples) {
@@ -108,9 +118,9 @@ check('first message contains the frontend placeholder', () => assert.match(data
 check('body presentation is separate from game colors and technical output', () => {
   const content = book.entries.find(item => item.comment.includes('正文呈现'))!.content;
   assert.match(content, /<span style="color: red">/);
-  assert.match(content, /不修改 noa.colors/);
+  assert.match(content, /不修改 noah.colors/);
   assert.match(content, /不在技术块中插入 HTML/);
-  assert.equal(data.character_version, 'p2-nvl-na');
+  assert.equal(data.character_version, 'p2-nvl-nb');
 });
 check('greeting declares a valid empty MVU update instead of being marked pending', () => {
   assert.equal(beginBatch({ stat_data: structuredClone(initialState) }, [], data.first_mes).error, '');

@@ -1,14 +1,14 @@
 # 当前进度与续接门
 
-更新时间：2026-09-27 17:43。此文件是唯一的进度入口。
+更新时间：2026-09-27（N4 成品 B 候选交付）。此文件是唯一的进度入口。
 
 ## 1. 当前结论
 
 - 保留成果：人物字段、初始值、成长规则、原作分层与素材边界继续有效。旧 P0 的 43 项检查含已废止协议，仅作历史证据，不代表 MVU Zod 路线已通过。
 - 当前阶段：用户已接受 P1，并在 R2 之后明确反馈“变量方面已经没有问题了”。变量故障按用户反馈关闭，保留现有 MVU 初始化和保存链；这不代表完整 P3 异常恢复或全部前端已经验收。
-- 当前许可：用户要求进入 N4 前建立命令行同步与固定地址异步前端，并明确“整本世界书替换不是问题，要的就是这个效果，无需任何校验，备份请用本地git”。本轮接入本地源码、构建和打包；推送省去差异检查、目标枚举、推送后回读和额外备份目录，保留请求失败提示及宿主认证。仍沿用不擅自运行测试/typecheck/lint/浏览器、真实酒馆写操作或模型调用的边界；本次未执行真实推送、安装、部署或发布。
-- 当前产品状态：N0/N1/N2 与成品 A（含发送等待修订 A-R2 `c0c12066f521`）已由用户接受，成品 A 阶段门关闭。N3 轻前端已实现并构建为检查点 `e287d9ad2d85`：Grid＋原生详情折叠，删除旧面板，保留全屏与已验收链路；N3 待用户手验，当前不推进 N4/N5。没有补造 A1～A8、W1～W5、L1～L6 的逐项执行记录，完整 P2/P3/P4/P5 未随成品 A 一并验收。旧包及改前备份保留。
-- N4 前置同步：新增检查点 `1826bf9bb084`，源码与构建已完成；卡内容由 `npm run sync:push` 更新，纯前端由 `npm run build` 更新后刷新。默认目标文件 `DLNM-P1-香气链路.png`，固定 UI 为 `http://127.0.0.1:5173/live/state.html`。首次真实推送与异步加载待手验，不将源码完成标为宿主通过。改前本地 Git 基线 `886753b`；额外标签请求未获执行，没有创建新标签、提交或备份目录，本轮改动尚未提交。
+- 当前许可：用户确认实施 N4 追加修订，范围为新变量结构、四人图片/布局、背景与正式图包接入、本地源码/构建/打包及文档。继续省去同步差异检查、目标枚举、推送后回读和额外备份目录；自动测试/typecheck/lint/浏览器、宿主写操作、模型调用、安装和发布保持独立边界，本轮均未执行。
+- 当前产品状态：成品 A（含 A-R2 `c0c12066f521`）保持用户已接受；N3 的手验未补造。用户明确允许继续 N4，现已构建成品 B 两种图片来源候选：开发 `40f920a8197a`、Gremlin `7b53e4281153`；当前活动入口为开发版，N3/N4 合并等用户手验。24 字段只用于新聊天，旧聊天不迁移/重置/删除。完整 P2/P3/P4/P5 及 N5 未据此通过。
+- N4 前置同步：沿用现有 `npm run sync:push` 与固定 UI `http://127.0.0.1:5173/live/state.html`；默认角色文件仍是 `DLNM-P1-香气链路.png`。本轮未执行真实推送，当前本地构建和同步输入均为最终开发候选；前置阶段的独立证据保留在第4节历史记录。
 - 蓝图：`single-blueprint`，深度 1，子蓝图 0，`runtimePersistentBlueprintBudget = 0`。
 - 临时问题支线：发送后首字前缺少反馈的问题随 A-R2 用户阶段验收关闭，当前无活动问题支线；没有新建蓝图。A 启动正则修复沿用；旧浏览器/Blob 问题只保留证据，先前全局渲染选项不视为本次修改入口。
 
@@ -17,6 +17,8 @@
 先读 [总设计案](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/docs/DESIGN.md)，再读 [实施蓝图](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/docs/BLUEPRINT.md)。保持三者职责分离，不在这里重复全部字段和需求。
 
 ## 2. 最近确认及禁止回退的更正
+
+- **2026-09-27 N4 最终确认：**破坏改名并新增塞拉菲娜/狸猫，总计 24 字段；smile 移除“微”；四图全幅、头像不折叠，宽2×2窄单列；塞拉菲娜与狸猫省去数值条和 details；旧聊天不迁移。完整实施与待验见第4节 N4 记录。
 
 - **2026-09-27 同步要求：**整本覆盖当前世界书；省去同步检查和额外文件备份，本地 Git 保存源码版本。前端使用固定地址异步加载，不再靠反复导入更新；已打开的界面在刷新或重渲染后更新，不强制打断输入/全屏。该要求不代表提前实施 N4 图片或 N5 内容。
 - 玩家是诺雅；共用香气只是日常邀请，不是强制任务。
@@ -105,15 +107,41 @@
 
 | 证据类别 | 当前状态 |
 | --- | --- |
-| 自动化测试 | **本轮未执行。** 仅新增可选 `scripts/check-sync.mjs`，构建与推送均不串联它；已有检查、类型检查和 lint 同样未执行 |
-| 本次构建/打包 | 同步检查点 `1826bf9bb084`：Vite 首次沙箱内 spawn EPERM；同命令经执行许可在沙箱外退出 0。构建资源、卡 JSON/说明和 ZIP 已生成，不把构建成功当宿主通过 |
-| 源码阅读 / 浏览器 | 已读模板、实际宿主公开静态源码及匹配提交的 HTTP 接口；独立只读审阅未发现阻断或明显缺陷。浏览器与前端运行未执行 |
-| 真实宿主 | 仅 GET 公开版本与静态源码；**没有 POST/真实推送。** 未读取私有卡/聊天、安装扩展、导入图包、改设置或调用模型 |
-| 用户 | **成品 A 阶段已验收，含 A-R2 `c0c12066f521`；N3 `e287d9ad2d85` 尚待用户手验。** A 的依据为用户直接表述“此阶段已验收，更新NEXT.md”；逐项测试过程未另行提供，不扩大为完整 P2/P3/P4/P5 验收 |
+| 自动化测试 | **本轮未执行。** 新增图片检查并更新 Schema/bridge/card/NVL 检查源码，均未运行；typecheck/lint 同样未运行 |
+| 本次构建/打包 | N4 开发 `40f920a8197a` 与 Gremlin `7b53e4281153` 均 Vite/装配退出 0；JSON/ZIP 清单回读及开发 PNG 哈希已记录下节；不是宿主通过 |
+| 源码阅读 / 浏览器 | 已读当前调用链与固定提交的 Gremlin API，独立只读审阅未留阻塞；**未运行浏览器或前端动态验证** |
+| 真实宿主 | 本轮未访问宿主私有数据、POST、推送、安装扩展、导图、改设置或调用模型；仅外部官方源码研究 |
+| 用户 | 成品 A 已接受；N4 两轮方案选择及“确认，开始实现”是实施许可，**N3/N4 成品 B 手验仍待用户接受**，无逐项测试虚构记录 |
 
 ## 4. 下一目标与既有交付
 
-### N4 前置 · 命令行同步与固定前端入口（2026-09-27）
+### N4 · 成品 B 候选已构建（2026-09-27，待用户手验）
+
+- **确认依据：**用户完成两轮 grill-me 后明确“确认，开始实现”。本轮是原 N4 追加修订，不扩 N5；旧聊天退出兼容范围，仅省去迁移，没有删除、重置或修改宿主聊天。
+- **变量合同：**`noa → noah`、`lilixia → lilicia`；`noah` 保留 11 字段并补 clothing=女仆服、expression=神态平静；`lilicia` 保留原五字段和初值；`seraphina` 仅 clothing=修女服，戴头纱 / expression=神态平静；`tanuki` 仅 expression=神态平静。`world` 保持三字段，合计 24 叶。Schema、颜色追加路径、YAML 初值、世界书规则、JSONPatch 示例与 UI 同步，既有数值上限/成长约定和 MVU 更新/保存生命周期保持。新增表情字段不强迫塞拉菲娜与狸猫每轮进入正文。
+- **映射：**`src/images.ts` 是匹配和开发图片允许清单的单一来源。先衣服再该角色支持的有序表情；单字 includes，smile 固定“喜、欢、乐、笑”，已移除“微”。诺雅/莉莉希雅“睡、内”→`_underwear`，塞拉菲娜“纱、巾”→`_sisterveil`；狸猫省去衣服。目标图→同衣 default→无后缀 default→文字缺图状态，回退原因可见，不跨角色。
+- **布局：**四角常显，宽容器 2×2（诺雅/莉莉希雅、塞拉菲娜/狸猫），窄容器单列。统一头像框/边距，object-fit:contain 保留全图；头像都在 details 外。诺雅与莉莉希雅保留两条数值条和详情折叠；塞拉菲娜与狸猫无数值条、无 details，少量字段直显。全屏侧栏相应扩宽，轻/全屏仍共用人物组件。
+- **背景：**沿用已确认的起居室、宅邸外观、走廊三处日夜映射；傍晚暂用夜图并标注，城市/未映射地点显示缺图，不借用上一地点画面。轻前端仍无背景。图片只从已保存的当前/历史快照派生。
+- **来源与生命周期：**新增 `CardImage.vue` 与 `image-loader.ts`；显式 `development/gremlin` 构建模式，正式不回退开发图。可选扩展有界等待；每次读取保留取消信号并复核聊天身份，切图/卸载取消迟到结果。图包更新后“重新读取状态与图片”重列清单和取 URL；无虚构图片变更事件、不持久化 Blob、不回收扩展共享 URL。
+- **扩展来源证据：**只读核对 [Illustration-Gremlin API v1.4.0 固定提交](https://github.com/pokerface-1224/Illustration-Gremlin/blob/222150201c9cd3ab48435fc9b9221ed699d79e24/API.md)。使用宿主 `IllustrationGremlin.listImages(current)` 与返回条目的 `getImageUrl(character, relativePath)`，URL 归扩展缓存。扩展按清洗后的卡名隔离而非头像 ID，同名卡目录碰撞属于实际使用注意项。没有探测用户安装状态、配置扩展或导入图包。
+- **资源边界：**Vite 保持 publicDir:false 和 dist-only 服务；仅复制 49 张人物图＋6 张背景图为内容哈希地址，共 33,698,248 字节，55 项 SHA256 构建产物回读一致。其余背景不复制，原图保持。两个交付 ZIP 都包含卡 JSON/说明、五项固定运行资源（含命名清单）、各自对应的 live/state.html、SYNC.md 与 RESTORE.txt；开发图片留本地 dist/n4-images，不混进正式图包或公开发布。
+- **构建与源码证据：**首次默认构建在沙箱内 spawn EPERM；同命令获准在沙箱外成功。最终开发版与 Gremlin 版均完成两次 Vite 编译及卡装配，退出 0。两版 Schema 都为 88,437 字节；开发 state.js 为 200,658 字节、正式为 196,868 字节；正式清单 55 个逻辑名、0 个开发路径，正式 bundle 中开发 n4-images URL 为 0。卡 JSON 回读版本 `p2-nvl-nb`、6 世界书条目/3 正则/2 脚本；绑定仍为 NA 世界书，避免变更既有同步目标。独立只读审阅未留有证据的阻塞项；最终 git diff --check 无错误，不视为动态测试。
+- **检查源码：**新增 `scripts/check-images.ts`，更新已有 Schema/bridge/card/NVL 检查以对应新字段、布局、匹配优先级、缺图/路径/取消边界；全部未运行。未执行测试、typecheck、lint、浏览器、宿主 POST、模型调用、安装、部署或发布。真实 CSS、解码、完整异步竞态、宿主/手机可达、持久化及用户验收仍开放。
+- **保留范围：**改前 Git 基线 `59b6c36`（feat: content sync）；原有未跟踪 `tools/` 保持原样。未改 AGENTS、依赖/锁、原 public、历史工件、历史 P0/P1 探针或 MVU register；没有新备份目录、Git 提交或新蓝图。首次草稿包保留，但交付以表中最终哈希为准。
+
+| 来源/格式 | 文件 | 字节 | SHA256 |
+| --- | --- | ---: | --- |
+| 开发占位 JSON | [dlnm-mvu-p2-dev-40f920a8197a.json](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-40f920a8197a.json) | 15,082 | `40f920a8197a16999b7b6dcb9cbab9f86a5b1d3c4a2e06d2b43d95122e602b59` |
+| 开发占位 ZIP | [dlnm-mvu-p2-dev-40f920a8197a.zip](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-40f920a8197a.zip) | 128,939 | `04ce8ed221bc404bcbb88c69e24ad23eb7ff45a3e8e811a9102a2246cc664026` |
+| Gremlin JSON | [dlnm-mvu-p2-dev-7b53e4281153.json](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-7b53e4281153.json) | 15,082 | `7b53e42811530c6ddedc81dd40b0b006cfcbdbfb5cda4cadc6d683c124320b70` |
+| Gremlin ZIP | [dlnm-mvu-p2-dev-7b53e4281153.zip](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-7b53e4281153.zip) | 125,338 | `b5b8c1da90329f539c2ff70438c0359d8e8f348b4ca12b567ccc4a8f31b225b7` |
+
+- 开发版说明与 B1～B10：[手验说明](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-40f920a8197a.md)；固定资源 `E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-86cdd5b71dca`。
+- Gremlin 版说明：[图包说明](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/dlnm-mvu-p2-dev-7b53e4281153.md)；固定资源 `E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-51e5ca8e99ab`。已生成不代表宿主可用。
+- **当前活动入口：**最后一次构建恢复默认开发模式，`dist/live/state.html` 指向开发版，`artifacts/dlnm-sync.json` 等同开发卡 JSON。旧 JSON 也用同一 live 地址，单独换 JSON 不会切换图片来源；正式模式请按说明修改 imageSource 或在构建/推送时保持 `DLNM_IMAGE_SOURCE=gremlin`。
+- **下一道门：**由用户选择同步后新建聊天，按交付说明 B1～B10 手验。先验证四角/初值/匹配，再验正式图包与历史切换；原 A/W 回归单独记录。成品 B 尚未 driver-accepted，不进入 N5，不把“开始实现”登记成 N3/N4 验收。
+
+### N4 前置 · 命令行同步与固定前端入口（2026-09-27，历史实施记录）
 
 - 使用说明：[SYNC.md](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/docs/SYNC.md)。使用现有 Vite 和 Node 标准库；没有引入依赖、复制模板工具链或部署接收服务。
 - 参照实际模板 `E:\PersonalAI\archived\tavern_helper_template\tavern_sync.mjs` 的推送思路。本项目 [tavern_sync.mjs](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/tavern_sync.mjs) 直接调用原生 HTTP 接口，保留 personality/scenario/system_prompt 等完整卡字段更新能力，省去模板简化 Character 格式与头像上传流程。
@@ -131,7 +159,7 @@
 
 **目标：**真实回复自动、连续地出现在 NVL 中；支持 Markdown 和正文染色；非全屏提供轻量人物状态栏；接入可替换图片与地点映射；世界书从技术骨架补成有事实依据的世界观和人物资料。
 
-**执行边界：**成品 A 阶段已获用户验收，N3 检查点已交付待手验；本轮新增上节 N4 前置同步设施，N4/完整成品 B 留待后续。保留已获用户确认的变量链、19 字段、YAML 初值、消息/分支存储和原生生成；不借优化重新设计状态系统。继续使用 Vite 开发地址，远程仓库建立后再换地址。旧成品、素材原件和冲突文件保持；不把阶段验收解读为测试、安装或发布许可。
+**执行边界：**成品 A 已验收，N3/N4 已按本轮明确许可合并实现并构建成品 B 候选，尚待手验。N4 将旧 19 字段升级为 24 字段，其他 MVU 生命周期、消息/分支存储、原生生成和 YAML 初值单一来源保持。继续使用 Vite 开发地址；原图、旧成品和无关文件保持。不将构建/打包扩大为测试、宿主、安装或发布许可。
 
 **与原阶段的关系：**UI 工作接续 P2；本次世界书完善是用户明确前移的原 P4 内容子项，不以 P3 尚未完整验收为由搁置，但也不标记 P3/P4 整体完成。DESIGN/BLUEPRINT 中“纯文本、面板模式、尚无项目图片”等旧合同由 N0 定向同步；同步前以本节最新用户纠正为准，不另建一套蓝图。
 
@@ -277,13 +305,13 @@
 
 - 固定资源目录：[dist/p2-973fa3d5dd48](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/dist/p2-973fa3d5dd48/)；schema.js 88,322、state.js 190,167、state.css 15,637、state.html 16,212 字节。JSON 回读：版本 `p2-nvl-na`、NA 世界书、6 条目/3 正则/2 脚本；Schema SHA256 仍为 `c327c1c860035c68cd190525e8f0bcd466d43036190fd658b9b8e30f0b8b1fbf`。ZIP 无覆盖创建，目录回读包含这四份固定资源与 JSON/说明。
 - 写前备份：[n3-backup-20260927-165731](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/artifacts/n3-backup-20260927-165731/)，包含涉及的既有源码、检查/打包脚本、三份文档和顶层构建输出；保留本轮开始时 NEXT 已有的未提交验收修改。AGENTS、依赖/锁文件、MVU 源码、原 public 和全部历史版本保持。
-- **当前停止点：**交用户手验 L1～L6 与相关 A/W 回归。自动测试、typecheck、lint、浏览器、真实酒馆、模型调用均未执行；Helper 自动高度、实际窄屏/手机、原生 details/meter 外观、Escape 与 iframe 接管仍待现场证据。N3 尚未写为用户接受，不自动进入 N4；N4 完成后再形成完整成品 B。
+- **N3 当时停止点：**交用户手验 L1～L6 与相关 A/W 回归。自动测试、typecheck、lint、浏览器、真实酒馆、模型调用均未执行；Helper 自动高度、实际窄屏/手机、原生 details/meter 外观、Escape 与 iframe 接管仍待现场证据。N3 尚未写为用户接受，不自动进入 N4；N4 完成后再形成完整成品 B。 用户随后明确允许 N4；当前改以本轮成品 B 手验门为准。
 
-#### N4 · 替换图像占位，接入地点映射与图包（待实施；依赖 N0、N3；对应需求 4）
+#### N4 · 替换图像占位，接入地点映射与图包（本轮已构建，成品 B 待手验）
 
 - **主要范围：**素材映射、人物栏/全屏场景、[delivery.config.mjs](E:/PersonalAI/archived/SmallProjects/demon_lily_and_the_noir_maid/delivery.config.mjs)、Vite/打包器的最小资源处理及说明。
 - **开发占位：**按已确认映射使用 public 中的图片替换当前几何占位。针对目前 Vite 只服务 dist 的结构，只把映射实际使用的图片送到限定开发资源目录，或增加明确受限的静态资源映射；不要把整个项目根暴露出来。界面和说明继续标注“开发占位图”，本地图片可见不代表正式图包接入完成。
-- **映射：**以已保存的 `world.location + world.period` 选背景；以已存在的莉莉希雅服装/表情等字段选头像，未知值使用明确默认图。诺雅目前没有表情/服装字段时先用固定默认头像，不借素材接入扩充已验收 Schema。历史页使用历史状态选图，异步迟到的图片结果不得覆盖已切走的聊天/场景；未映射地点、缺失夜景/城市图有标注的缺图状态，不让上一地点图片冒充新地点。
+- **映射：**以已保存的 `world.location + world.period` 选背景；四角色字段、单字词表、服装优先与回退规则以本轮 N4 记录及 DESIGN 为准，替代原“保持 19 字段、诺雅固定头像”的旧限制。历史页使用历史快照；异步迟到结果不覆盖已切走的画面，未映射地点显示缺图。
 - **正式运行：**说明要求用户自行安装 [Illustration-Gremlin](https://github.com/pokerface-1224/Illustration-Gremlin) 并给当前角色卡导入图包；项目不代装扩展、不改宿主存储。开发 public 来源与正式图包来源明确区分，正式模式缺扩展/缺图时提示安装或补图，不悄悄依赖作者电脑的 public 地址。
 - **接口路线：**在当前角色范围内等待/探测 `IllustrationGremlin`，列图后依据返回的角色与相对路径精确取图，不依赖跨角色占位符查找。用 N0 的唯一图名建立映射，不依赖重名自动编号；图片读取失败不阻断正文和人物数值。Blob URL 只作本次浏览器显示引用，不存进 MVU 或聊天；先核对扩展缓存/URL 所有权，再处理图包更新、刷新、切卡和卸载，避免全屏/轻前端一方释放仍被另一方使用的 URL。
 - **图包边界：**交付命名清单与映射/导入说明；若制作图包则使用单独副本，原图不重命名、不就地覆盖。public 临时图片不默认进入正式卡包、远程仓库或公开发布；资源资格与用户自行准备图包的边界保持明确。
@@ -518,6 +546,8 @@ P0 退出后先更新本文件，再进入以下入口检查；本轮没有越�
 </details>
 
 ## 5. 工作方式与资料回执
+
+- 2026-09-27 N4：写前目标/红线/验收经两轮 grill-me 收口并获实施确认。Library 路由 media-live2d-runtime、embedded-ui、card-pipeline，快照2026-08-18；采用A0、E3/E4媒体生命周期、C2/D7共享容器布局、A2/D1/D4装配与资源边界；候选目录未采用。实际Gremlin签名/缓存以固定官方提交为准，宿主和人工验收分开；新增图片检查只留源码，没有执行。
 
 - 2026-09-27 N3：Library 路由 `sillytavern-embedded-ui` 与 `sillytavern-card-pipeline`，快照 `2026-08-18`；采用 A0 目标/红线/验收、C2/C3/D7 的共享只读人物栏与容器布局原则、D1 固定资源和已有打包器适配合同。目录候选未采用，无新增依赖或第二状态源。目标与禁测边界写前回读，构建/包内容回读与宿主/用户验收分开；后两者仍待本包证据。
 - 2026-09-24 阶段验收登记：仅更新本 NEXT，依据用户直接验收表述记录成品 A／A-R2 已接受、下一段 N3；JSON 哈希回读与既有交付一致。Library 路由 `sillytavern-card-pipeline`，快照 `2026-08-18`，采用 A0 与验收证据分层规则；没有重新打包、自动测试或宿主操作，既有检查缺口如实保留。

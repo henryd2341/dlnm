@@ -13,12 +13,12 @@ check('reserved temporary field only', () => {
   assert.equal(runtimeSchema.safeParse({ ...initialState, extra: {} }).success, false);
 });
 check('valid round uses MVU output, not own calculator', () => {
-  const patches = [{ op: 'delta', path: '/noa/stamina', value: -2 }];
+  const patches = [{ op: 'delta', path: '/noah/stamina', value: -2 }];
   const v = fresh(), cmd = commands(patches), batch = beginBatch(v, cmd, message(patches));
   assert.equal(batch.error, '');
-  v.stat_data.noa.stamina = 98; // stand-in for upstream; not real-host evidence
+  v.stat_data.noah.stamina = 98; // stand-in for upstream; not real-host evidence
   finishBatch(v, [], batch);
-  assert.equal(v.stat_data.noa.stamina, 98);
+  assert.equal(v.stat_data.noah.stamina, 98);
   assert.equal(v.dlnm_sync.status, 'valid');
   assert.equal(v.unrelated, 'preserve');
 });
@@ -31,22 +31,22 @@ check('empty is valid, missing is pending', () => {
   }
 });
 check('one leftover rolls back all successful prior commands', () => {
-  const patches = [{ op: 'delta', path: '/noa/stamina', value: -2 }, { op: 'delta', path: '/lilixia/mana', value: 5 }];
+  const patches = [{ op: 'delta', path: '/noah/stamina', value: -2 }, { op: 'delta', path: '/lilicia/mana', value: 5 }];
   const v = fresh(), cmd = commands(patches), batch = beginBatch(v, cmd, message(patches));
-  v.stat_data.noa.stamina = 98;
+  v.stat_data.noah.stamina = 98;
   finishBatch(v, cmd.slice(1), batch);
   assert.deepEqual(v.stat_data, initialState);
   assert.equal(v.dlnm_sync.status, 'pending');
 });
 check('reject malformed, unknown, coercion, extra commands', () => {
   for (const patches of [
-    [{ op: 'move', path: '/noa/stamina', value: 1 }],
-    [{ op: 'replace', path: '/noa/fake', value: 1 }],
-    [{ op: 'delta', path: '/noa/stamina', value: '1' }],
+    [{ op: 'move', path: '/noah/stamina', value: 1 }],
+    [{ op: 'replace', path: '/noah/fake', value: 1 }],
+    [{ op: 'delta', path: '/noah/stamina', value: '1' }],
     [{ op: 'delta', path: '/world/location', value: 1 }],
-    [{ op: 'insert', path: '/noa/colors/-', value: ' ' }],
+    [{ op: 'insert', path: '/noah/colors/-', value: ' ' }],
     [{ op: 'replace', path: '/world', value: {} }],
-    [{ op: 'replace', path: '/noa/stamina', value: 5, extra: true }],
+    [{ op: 'replace', path: '/noah/stamina', value: 5, extra: true }],
   ]) {
     const v = fresh(), cmd = commands(patches), batch = beginBatch(v, cmd, message(patches));
     assert.ok(batch.error);
@@ -60,7 +60,7 @@ check('reject malformed, unknown, coercion, extra commands', () => {
 });
 check('post-update invalid state rolls back', () => {
   const v = fresh(), batch = beginBatch(v, [], message([]));
-  v.stat_data.noa.stamina = 101;
+  v.stat_data.noah.stamina = 101;
   finishBatch(v, [], batch);
   assert.deepEqual(v.stat_data, initialState);
 });

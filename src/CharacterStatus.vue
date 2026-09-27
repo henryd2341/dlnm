@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { State } from './mvu/schema.ts';
+import CardImage from './CardImage.vue';
+import { portraitNames } from './images.ts';
 
-const props = defineProps<{ snapshot: State | null; stateMessageId: number | null }>();
+const props = defineProps<{ snapshot: State | null; stateMessageId: number | null; chatKey: string; imageRevision: number }>();
 const traitGroups = computed(() => props.snapshot ? [
-  { label: '技能', color: '橙', items: [['清洁', props.snapshot.noa.cleaning, 1000], ['料理', props.snapshot.noa.cooking, 1000], ['洗涤', props.snapshot.noa.laundry, 1000]] },
-  { label: '教养', color: '蓝', items: [['礼仪', props.snapshot.noa.etiquette, 1000], ['知识', props.snapshot.noa.knowledge, 1000]] },
-  { label: '人格', color: '绿', items: [['魅力', props.snapshot.noa.charm, 1000], ['亲爱', props.snapshot.noa.affection, 1000]] },
-  { label: '本能', color: '红', items: [['感度', props.snapshot.noa.sensitivity, 1000], ['欲求', props.snapshot.noa.desire, 100]] },
+  { label: '技能', color: '橙', items: [['清洁', props.snapshot.noah.cleaning, 1000], ['料理', props.snapshot.noah.cooking, 1000], ['洗涤', props.snapshot.noah.laundry, 1000]] },
+  { label: '教养', color: '蓝', items: [['礼仪', props.snapshot.noah.etiquette, 1000], ['知识', props.snapshot.noah.knowledge, 1000]] },
+  { label: '人格', color: '绿', items: [['魅力', props.snapshot.noah.charm, 1000], ['亲爱', props.snapshot.noah.affection, 1000]] },
+  { label: '本能', color: '红', items: [['感度', props.snapshot.noah.sensitivity, 1000], ['欲求', props.snapshot.noah.desire, 100]] },
 ] as const : []);
 function hasColor(color: string) {
-  return props.snapshot?.noa.colors.some(value => value === color || value === `${color}色`) ?? false;
+  return props.snapshot?.noah.colors.some(value => value === color || value === `${color}色`) ?? false;
 }
 </script>
 
@@ -19,42 +21,53 @@ function hasColor(color: string) {
     <div v-if="snapshot" class="character-grid">
       <section class="character-card" aria-label="诺雅的状态">
         <h2>诺雅</h2>
+        <CardImage :names="portraitNames('noah', snapshot.noah)" label="诺雅" :chat-key="chatKey" :revision="imageRevision" />
         <div class="primary-meter">
-          <span>体力</span><b>{{ snapshot.noa.stamina }} / 100</b>
-          <meter min="0" max="100" :value="snapshot.noa.stamina" aria-label="诺雅体力"></meter>
+          <span>体力</span><b>{{ snapshot.noah.stamina }} / 100</b>
+          <meter min="0" max="100" :value="snapshot.noah.stamina" aria-label="诺雅体力"></meter>
         </div>
         <details>
           <summary>诺雅详情</summary>
           <div class="character-details">
-            <div class="portrait portrait-noa" role="img" aria-label="诺雅头像占位"><span>头像占位</span><b>诺雅</b></div>
+            <dl><div><dt>服装</dt><dd>{{ snapshot.noah.clothing }}</dd></div><div><dt>神态</dt><dd>{{ snapshot.noah.expression }}</dd></div></dl>
             <div class="traits-grid">
               <section v-for="group in traitGroups" :key="group.label" class="trait-group">
                 <h3 :class="['color-label', `tone-${group.color}`, { active: hasColor(group.color) }]">{{ group.label }} · {{ group.color }}</h3>
                 <dl><div v-for="item in group.items" :key="item[0]"><dt>{{ item[0] }}</dt><dd>{{ item[1] }} / {{ item[2] }}</dd></div></dl>
               </section>
             </div>
-            <p class="colors">已获得颜色：{{ snapshot.noa.colors.length ? snapshot.noa.colors.join('、') : '暂无' }}</p>
+            <p class="colors">已获得颜色：{{ snapshot.noah.colors.length ? snapshot.noah.colors.join('、') : '暂无' }}</p>
           </div>
         </details>
       </section>
       <section class="character-card" aria-label="莉莉希雅的状态">
         <h2>莉莉希雅</h2>
+        <CardImage :names="portraitNames('lilicia', snapshot.lilicia)" label="莉莉希雅" :chat-key="chatKey" :revision="imageRevision" />
         <div class="primary-meter">
-          <span>魔力</span><b>{{ snapshot.lilixia.mana }} / 100</b>
-          <meter min="0" max="100" :value="snapshot.lilixia.mana" aria-label="莉莉希雅魔力"></meter>
+          <span>魔力</span><b>{{ snapshot.lilicia.mana }} / 100</b>
+          <meter min="0" max="100" :value="snapshot.lilicia.mana" aria-label="莉莉希雅魔力"></meter>
         </div>
         <details>
           <summary>莉莉希雅详情</summary>
           <div class="character-details">
-            <div class="portrait portrait-lilixia" role="img" aria-label="莉莉希雅头像占位"><span>头像占位</span><b>莉莉希雅</b></div>
             <dl class="description-list">
-              <div><dt>外貌</dt><dd>{{ snapshot.lilixia.appearance }}</dd></div>
-              <div><dt>服装</dt><dd>{{ snapshot.lilixia.clothing }}</dd></div>
-              <div><dt>神态</dt><dd>{{ snapshot.lilixia.expression }}</dd></div>
-              <div><dt>状态</dt><dd>{{ snapshot.lilixia.condition }}</dd></div>
+              <div><dt>外貌</dt><dd>{{ snapshot.lilicia.appearance }}</dd></div>
+              <div><dt>服装</dt><dd>{{ snapshot.lilicia.clothing }}</dd></div>
+              <div><dt>神态</dt><dd>{{ snapshot.lilicia.expression }}</dd></div>
+              <div><dt>状态</dt><dd>{{ snapshot.lilicia.condition }}</dd></div>
             </dl>
           </div>
         </details>
+      </section>
+      <section class="character-card" aria-label="塞拉菲娜的状态">
+        <h2>塞拉菲娜</h2>
+        <CardImage :names="portraitNames('seraphina', snapshot.seraphina)" label="塞拉菲娜" :chat-key="chatKey" :revision="imageRevision" />
+        <dl><div><dt>服装</dt><dd>{{ snapshot.seraphina.clothing }}</dd></div><div><dt>神态</dt><dd>{{ snapshot.seraphina.expression }}</dd></div></dl>
+      </section>
+      <section class="character-card" aria-label="狸猫的状态">
+        <h2>狸猫</h2>
+        <CardImage :names="portraitNames('tanuki', snapshot.tanuki)" label="狸猫" :chat-key="chatKey" :revision="imageRevision" />
+        <dl><div><dt>神态</dt><dd>{{ snapshot.tanuki.expression }}</dd></div></dl>
       </section>
       <details class="state-source">
         <summary>状态来源</summary>
@@ -67,9 +80,10 @@ function hasColor(color: string) {
 
 <style scoped>
 *, *::before, *::after { box-sizing: border-box; }
-.character-status { min-width: 0; color: #f3f1ed; background: #121212; font: 16px/1.65 "Noto Serif SC", "Songti SC", "Microsoft YaHei", serif; overflow-wrap: anywhere; }
-.character-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); align-items: start; gap: .8rem; padding: .8rem; }
-.character-card { display: grid; min-width: 0; gap: .5rem; padding: .75rem; border: 1px solid #393939; background: #1c1c1c; }
+.character-status { container-type: inline-size; min-width: 0; color: #f3f1ed; background: #121212; font: 16px/1.65 "Noto Serif SC", "Songti SC", "Microsoft YaHei", serif; overflow-wrap: anywhere; }
+.character-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: .8rem; padding: .8rem; }
+@container (min-width: 30rem) { .character-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.character-card { display: grid; align-content: start; min-width: 0; gap: .5rem; padding: .75rem; border: 1px solid #393939; background: #1c1c1c; }
 h2 { margin: 0; font-size: 1rem; }
 .primary-meter { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .4rem; font-size: .85rem; }
 meter { grid-column: 1 / -1; width: 100%; height: .65rem; appearance: none; border: 0; border-radius: 2px; background: #4a4a4a; }
@@ -80,12 +94,6 @@ details { min-width: 0; }
 summary { min-height: 44px; padding: .55rem .2rem; cursor: pointer; font-size: .85rem; }
 summary:focus-visible { outline: 3px solid #dedbd5; outline-offset: 2px; }
 .character-details { display: grid; grid-template-columns: minmax(0, 1fr); gap: .8rem; padding-top: .4rem; }
-.portrait { position: relative; width: 82px; max-width: 100%; height: 116px; display: grid; place-content: center; overflow: hidden; border: 1px solid #6a6863; background: linear-gradient(135deg, #555, #151515 70%); text-align: center; }
-.portrait::before { content: ""; width: 34px; height: 34px; margin: auto; border: 2px solid #a5a39e; border-radius: 50%; }
-.portrait::after { content: ""; width: 58px; height: 48px; margin-top: -2px; border: 2px solid #888681; border-bottom: 0; border-radius: 50% 50% 0 0; }
-.portrait span { position: absolute; inset: .2rem .2rem auto; color: #ccc; font-size: .62rem; }
-.portrait b { position: absolute; inset: auto 0 0; padding: .2rem; background: #111d; font-size: .76rem; }
-.portrait-lilixia { background: linear-gradient(215deg, #717171, #1b1b1b 68%); }
 .traits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: .7rem; }
 .trait-group { min-width: 0; }
 .trait-group h3 { margin: 0 0 .3rem; padding-left: .45rem; border-left: 4px solid #747474; color: #aaa; font-size: .8rem; }
