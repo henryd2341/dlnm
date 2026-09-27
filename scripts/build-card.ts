@@ -39,11 +39,11 @@ const card = createCard({ schemaScript, loaderScript, stateHtml: createLiveLoade
 const content = JSON.stringify(card, null, 2) + '\n';
 const hash = createHash('sha256').update(content).digest('hex');
 const name = `dlnm-mvu-p2-dev-${hash.slice(0, 12)}`;
-const instructions = `# DLNM N4 · 成品 B 候选
+const instructions = `# DLNM N4 · 成品 B-R1 布局修订
 
 ## 交付状态
 
-本包包含新聊天的 24 字段结构、四人图片状态栏、三处地点日夜背景和 Illustration-Gremlin 正式图片读取层。只完成本地源码、构建和打包；自动测试、typecheck、lint、浏览器、真实酒馆、模型调用与用户手验均未执行。N3/N4 合并交成品 B 手验，不预填通过。N5 世界书内容扩充保持后续。
+用户已反馈成品 B 基础验证通过；B-R1 仅将人物区改成单列、左图右状态，收紧头像留白。原图、24 字段结构、图片匹配与背景规则保持原样。本修订只完成本地源码、构建和打包；自动测试、typecheck、lint、浏览器、真实酒馆和模型调用均未执行，新布局待用户手验。N5 世界书内容扩充保持后续。
 
 - 卡版本：${card.data.character_version}；JSON SHA256：${hash}
 - 本次图片来源：**${imageManifest.source === 'development' ? 'development：开发占位图' : 'gremlin：当前角色图包'}**
@@ -55,7 +55,7 @@ const instructions = `# DLNM N4 · 成品 B 候选
 ## 启动与更新
 
 1. 在项目根目录运行 npm run dev，保持 ${devOrigin}/ 可访问；Vite 只服务 dist，不公开项目源码或整个 public。
-2. Schema 和世界书已破坏性升级。使用 docs/SYNC.md 的准确现有角色文件名，执行 npm run sync:push 后**新建聊天**；旧聊天不迁移、不重置、不删除。代理本轮没有执行推送。
+2. 从 N4 以前的版本升级时，Schema 和世界书属于破坏性升级：按 docs/SYNC.md 执行 npm run sync:push 后新建聊天，旧聊天不迁移/重置/删除。已使用成品 B 的 24 字段聊天升级 B-R1 时，只需第 4 步刷新前端，沿用现有聊天；本修订没有变量迁移。代理本轮没有执行推送。
 3. 初次建立角色才导入 JSON；已有卡用命令行同步。主世界书仍是 ${card.data.character_book.name}，按用户既定要求整本覆盖。保留 3 正则、2 脚本及 MVU 固定版本；[initvar] 提示禁用是正常设置。
 4. 纯前端以后 npm run build，再刷新酒馆或重新渲染消息。已打开的前端不强制中断。构建覆盖 dist/live/state.html 与 artifacts/dlnm-sync.json，历史固定目录保留。
 5. 重新读取状态与图片会重新列当前图包并获取 URL；导入、更新、删除图片后点击它。每次进入轻前端/全屏也重新取图。图片失败不阻断正文或人物数值。
@@ -94,16 +94,16 @@ ${imageManifest.images.map(image => `| ${image.name} | public/${image.source} |`
 | --- | --- | --- |
 ${expressionRules.map(([expression, keys], index) => `| ${index + 1} | ${expression} | ${[...keys].join('、')} |`).join('\n')}
 
-宽区 2×2 按诺雅、莉莉希雅、塞拉菲娜、狸猫排列，窄区单列。头像框完整容纳图片并用边距统一大小；四张头像均在 details 外。诺雅体力、莉莉希雅魔力常显；两人其他字段可折叠。塞拉菲娜与狸猫没有数值条或 details，少量字段直接显示。人物状态来源保留独立折叠入口。
+宽窄区均按诺雅、莉莉希雅、塞拉菲娜、狸猫单列排列；每项左图右状态。左图栏取卡片内容宽度的 32%，上限 7.5rem；图片按原比例自然高度显示，内边距 .25rem，保留全图，不强行等高。四张头像均在 details 外。诺雅体力、莉莉希雅魔力常显；两人其他字段可折叠。塞拉菲娜与狸猫没有数值条或 details，少量字段直接显示。人物状态来源保留独立折叠入口；全屏人物栏沿用内部滚动。
 
 背景仅映射宅邸起居室/起居室/客厅、宅邸外观/宅邸门外/宅邸正门、宅邸走廊/走廊/廊道。清晨/上午/午后用 day，夜间/深夜用 night，傍晚用 night 并明确提示暂无黄昏图。未映射地点（包括城市）显示缺图状态，不沿用上一地点图片。
 
-## 成品 B 手验（全部待执行）
+## 成品 B 手验清单（基础验证已有用户反馈，B-R1 重点复核 B2）
 
 | 编号 | 操作 | 预期 |
 | --- | --- | --- |
 | B1 | 同步后新建聊天 | 自动初始化五个顶层分组及 24 字段，四角可见；旧聊天无自动迁移/重置 |
-| B2 | 宽消息区、窄容器、全屏/退出 | 宽区2×2、窄区单列；头像完整；塞/狸没有数值条与details；诺/莉折叠不藏头像 |
+| B2 | 宽消息区、320px 窄容器、全屏/退出；展开详情、查看长字段与缺图提示 | 始终单列左图右状态，头像留白收紧、比例完整，无横向溢出；狸猫按自身比例显示；塞/狸没有数值条与details；诺/莉折叠不藏头像；全屏人物栏可滚动看全四人 |
 | B3 | 用变量编辑器在当前副本保存睡衣＋羞涩微笑、微怒、疲惫微笑 | 分别显示 blush_underwear、default、tired_smile；这是建议手验，代理未写宿主变量 |
 | B4 | 塞拉菲娜戴头纱/长发披散，狸猫忧虑/笑容 | 头纱服装正确切换；狸猫只按表情，无衣服后缀 |
 | B5 | 三地点、日夜、傍晚、未映射地点 | 对应背景/明确黄昏回退/缺图提示；轻前端始终无背景 |
@@ -113,7 +113,7 @@ ${expressionRules.map(([expression, keys], index) => `| ${index + 1} | ${express
 | B9 | 更新/删除/重新导入图包后重新读取，刷新与反复全屏 | 新图片可见，过期Blob不复用，不主动revoke破坏另一视图 |
 | B10 | 按已有A/W清单回归流式、非流式、等待、停止、Markdown/染色 | 原已验收链路保留；单独记录本包实际运行证据 |
 
-本次提供 scripts/check-images.ts 及更新过的 Schema/bridge/card/NVL 检查源码，均未运行。构建输出与源代码回读仅是离线证据，实际 CSS、宿主加载、图片解码、历史/切卡竞态、保存恢复与手机仍待手验。改前已提交源码基线为 59b6c36；不另建备份目录，不自动提交。
+现有 scripts/check-nvl.ts 已同步单列与左右栏检查，未运行；其他检查亦未执行。构建输出与源代码回读仅是离线证据，新布局的实际 CSS、宿主加载、窄屏与手机表现仍待手验。历史固定资源和成品包保留，不另建备份目录，不自动提交。
 `;
 // Immutable checkpoints: allow identical re-packs, stop on any content collision.
 const outputs = new Map([

@@ -20,54 +20,62 @@ function hasColor(color: string) {
   <section class="character-status" aria-label="人物与状态">
     <div v-if="snapshot" class="character-grid">
       <section class="character-card" aria-label="诺雅的状态">
-        <h2>诺雅</h2>
         <CardImage :names="portraitNames('noah', snapshot.noah)" label="诺雅" :chat-key="chatKey" :revision="imageRevision" />
-        <div class="primary-meter">
-          <span>体力</span><b>{{ snapshot.noah.stamina }} / 100</b>
-          <meter min="0" max="100" :value="snapshot.noah.stamina" aria-label="诺雅体力"></meter>
-        </div>
-        <details>
-          <summary>诺雅详情</summary>
-          <div class="character-details">
-            <dl><div><dt>服装</dt><dd>{{ snapshot.noah.clothing }}</dd></div><div><dt>神态</dt><dd>{{ snapshot.noah.expression }}</dd></div></dl>
-            <div class="traits-grid">
-              <section v-for="group in traitGroups" :key="group.label" class="trait-group">
-                <h3 :class="['color-label', `tone-${group.color}`, { active: hasColor(group.color) }]">{{ group.label }} · {{ group.color }}</h3>
-                <dl><div v-for="item in group.items" :key="item[0]"><dt>{{ item[0] }}</dt><dd>{{ item[1] }} / {{ item[2] }}</dd></div></dl>
-              </section>
-            </div>
-            <p class="colors">已获得颜色：{{ snapshot.noah.colors.length ? snapshot.noah.colors.join('、') : '暂无' }}</p>
+        <div class="character-info">
+          <h2>诺雅</h2>
+          <div class="primary-meter">
+            <span>体力</span><b>{{ snapshot.noah.stamina }} / 100</b>
+            <meter min="0" max="100" :value="snapshot.noah.stamina" aria-label="诺雅体力"></meter>
           </div>
-        </details>
+          <details>
+            <summary>诺雅详情</summary>
+            <div class="character-details">
+              <dl><div><dt>服装</dt><dd>{{ snapshot.noah.clothing }}</dd></div><div><dt>神态</dt><dd>{{ snapshot.noah.expression }}</dd></div></dl>
+              <div class="traits-grid">
+                <section v-for="group in traitGroups" :key="group.label" class="trait-group">
+                  <h3 :class="['color-label', `tone-${group.color}`, { active: hasColor(group.color) }]">{{ group.label }} · {{ group.color }}</h3>
+                  <dl><div v-for="item in group.items" :key="item[0]"><dt>{{ item[0] }}</dt><dd>{{ item[1] }} / {{ item[2] }}</dd></div></dl>
+                </section>
+              </div>
+              <p class="colors">已获得颜色：{{ snapshot.noah.colors.length ? snapshot.noah.colors.join('、') : '暂无' }}</p>
+            </div>
+          </details>
+        </div>
       </section>
       <section class="character-card" aria-label="莉莉希雅的状态">
-        <h2>莉莉希雅</h2>
         <CardImage :names="portraitNames('lilicia', snapshot.lilicia)" label="莉莉希雅" :chat-key="chatKey" :revision="imageRevision" />
-        <div class="primary-meter">
-          <span>魔力</span><b>{{ snapshot.lilicia.mana }} / 100</b>
-          <meter min="0" max="100" :value="snapshot.lilicia.mana" aria-label="莉莉希雅魔力"></meter>
-        </div>
-        <details>
-          <summary>莉莉希雅详情</summary>
-          <div class="character-details">
-            <dl class="description-list">
-              <div><dt>外貌</dt><dd>{{ snapshot.lilicia.appearance }}</dd></div>
-              <div><dt>服装</dt><dd>{{ snapshot.lilicia.clothing }}</dd></div>
-              <div><dt>神态</dt><dd>{{ snapshot.lilicia.expression }}</dd></div>
-              <div><dt>状态</dt><dd>{{ snapshot.lilicia.condition }}</dd></div>
-            </dl>
+        <div class="character-info">
+          <h2>莉莉希雅</h2>
+          <div class="primary-meter">
+            <span>魔力</span><b>{{ snapshot.lilicia.mana }} / 100</b>
+            <meter min="0" max="100" :value="snapshot.lilicia.mana" aria-label="莉莉希雅魔力"></meter>
           </div>
-        </details>
+          <details>
+            <summary>莉莉希雅详情</summary>
+            <div class="character-details">
+              <dl class="description-list">
+                <div><dt>外貌</dt><dd>{{ snapshot.lilicia.appearance }}</dd></div>
+                <div><dt>服装</dt><dd>{{ snapshot.lilicia.clothing }}</dd></div>
+                <div><dt>神态</dt><dd>{{ snapshot.lilicia.expression }}</dd></div>
+                <div><dt>状态</dt><dd>{{ snapshot.lilicia.condition }}</dd></div>
+              </dl>
+            </div>
+          </details>
+        </div>
       </section>
       <section class="character-card" aria-label="塞拉菲娜的状态">
-        <h2>塞拉菲娜</h2>
         <CardImage :names="portraitNames('seraphina', snapshot.seraphina)" label="塞拉菲娜" :chat-key="chatKey" :revision="imageRevision" />
-        <dl><div><dt>服装</dt><dd>{{ snapshot.seraphina.clothing }}</dd></div><div><dt>神态</dt><dd>{{ snapshot.seraphina.expression }}</dd></div></dl>
+        <div class="character-info">
+          <h2>塞拉菲娜</h2>
+          <dl><div><dt>服装</dt><dd>{{ snapshot.seraphina.clothing }}</dd></div><div><dt>神态</dt><dd>{{ snapshot.seraphina.expression }}</dd></div></dl>
+        </div>
       </section>
       <section class="character-card" aria-label="狸猫的状态">
-        <h2>狸猫</h2>
         <CardImage :names="portraitNames('tanuki', snapshot.tanuki)" label="狸猫" :chat-key="chatKey" :revision="imageRevision" />
-        <dl><div><dt>神态</dt><dd>{{ snapshot.tanuki.expression }}</dd></div></dl>
+        <div class="character-info">
+          <h2>狸猫</h2>
+          <dl><div><dt>神态</dt><dd>{{ snapshot.tanuki.expression }}</dd></div></dl>
+        </div>
       </section>
       <details class="state-source">
         <summary>状态来源</summary>
@@ -80,10 +88,10 @@ function hasColor(color: string) {
 
 <style scoped>
 *, *::before, *::after { box-sizing: border-box; }
-.character-status { container-type: inline-size; min-width: 0; color: #f3f1ed; background: #121212; font: 16px/1.65 "Noto Serif SC", "Songti SC", "Microsoft YaHei", serif; overflow-wrap: anywhere; }
-.character-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: .8rem; padding: .8rem; }
-@container (min-width: 30rem) { .character-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.character-card { display: grid; align-content: start; min-width: 0; gap: .5rem; padding: .75rem; border: 1px solid #393939; background: #1c1c1c; }
+.character-status { min-width: 0; color: #f3f1ed; background: #121212; font: 16px/1.65 "Noto Serif SC", "Songti SC", "Microsoft YaHei", serif; overflow-wrap: anywhere; }
+.character-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: .6rem; padding: .6rem; }
+.character-card { display: grid; grid-template-columns: min(32%, 7.5rem) minmax(0, 1fr); align-items: start; min-width: 0; gap: .75rem; padding: .6rem; border: 1px solid #393939; background: #1c1c1c; }
+.character-info { display: grid; min-width: 0; gap: .4rem; }
 h2 { margin: 0; font-size: 1rem; }
 .primary-meter { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .4rem; font-size: .85rem; }
 meter { grid-column: 1 / -1; width: 100%; height: .65rem; appearance: none; border: 0; border-radius: 2px; background: #4a4a4a; }

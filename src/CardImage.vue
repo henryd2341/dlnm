@@ -50,8 +50,8 @@ function expired() { src.value = ''; message.value = '图片地址已失效，�
 
 <style scoped>
 .card-image { box-sizing: border-box; min-width: 0; margin: 0; background: #111; }
-img, .image-placeholder { box-sizing: border-box; display: block; width: 100%; height: 14rem; padding: .65rem; object-fit: contain; }
-.image-placeholder { display: grid; place-content: center; color: #aaa; border: 1px dashed #555; }
+img, .image-placeholder { box-sizing: border-box; display: block; width: 100%; height: auto; padding: .25rem; object-fit: contain; }
+.image-placeholder { display: grid; place-content: center; aspect-ratio: 3 / 4; color: #aaa; border: 1px dashed #555; }
 figcaption { min-height: 2.5em; padding: .25rem .5rem; color: #b9b6b0; font: .7rem/1.4 sans-serif; overflow-wrap: anywhere; }
 .scene-image { position: relative; min-height: 520px; height: 100%; filter: grayscale(1); }
 .scene-image img, .scene-image .image-placeholder { position: sticky; top: 0; height: min(100dvh, 760px); min-height: 520px; padding: 0; object-fit: cover; }

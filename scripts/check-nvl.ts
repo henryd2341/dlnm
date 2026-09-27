@@ -114,8 +114,13 @@ const folded = [...statusTemplate.matchAll(/<details\b[^>]*>[\s\S]*?<\/details>/
 assert.equal(folded.length, 3);
 assert.ok(folded.every(part => !/<meter|<CardImage|<details[^>]*\bopen\b/.test(part)));
 assert.equal([...statusTemplate.matchAll(/<meter\b/g)].length, 2);
-assert.match(status, /@container \(min-width: 30rem\)/);
-assert.match(status, /repeat\(2, minmax\(0, 1fr\)\)/);
+assert.match(status, /\.character-grid \{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
+assert.match(status, /\.character-card \{[^}]*grid-template-columns: min\(32%, 7\.5rem\) minmax\(0, 1fr\)/);
+assert.doesNotMatch(status, /@container|repeat\(2, minmax\(0, 1fr\)\)/);
+assert.equal([...statusTemplate.matchAll(/<CardImage\b[^>]*\/>\s*<div class="character-info">\s*<h2>/g)].length, 4);
+const portrait = readFileSync(new URL('../src/CardImage.vue', import.meta.url), 'utf8');
+assert.match(portrait, /img, \.image-placeholder \{[^}]*height: auto;[^}]*object-fit: contain/);
+assert.doesNotMatch(portrait, /height: 14rem/);
 assert.equal([...statusTemplate.matchAll(/<CardImage\b/g)].length, 4);
 for (const name of ['塞拉菲娜', '狸猫']) {
   const card = statusTemplate.match(new RegExp(`<section class="character-card" aria-label="${name}的状态">[\\s\\S]*?<\\/section>`))?.[0];
