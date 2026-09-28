@@ -1,5 +1,15 @@
 node_modules/
 .npm-cache/
+.omx/
 dist/
 public/**/*.png
 artifacts/
+docs/
+tools/
+AGENTS.md
+src/p1-*
+/scripts/*
+!/scripts/build-card.ts
+!/scripts/live-loader.mjs
+!/scripts/check-*.ts
+!/scripts/check-sync.mjs
