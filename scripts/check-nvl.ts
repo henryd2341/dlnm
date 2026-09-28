@@ -108,6 +108,32 @@ assert.match(entry, /<CharacterStatus/);
 assert.match(view, /<CharacterStatus/);
 assert.doesNotMatch(entry, /<textarea|scene-placeholder|history-menu|面板模式/);
 assert.doesNotMatch(view, /change-mode|面板模式/);
+// Narrow fullscreen keeps one mounted status panel and the host viewport/focus boundary.
+assert.equal([...view.matchAll(/<CharacterStatus\b/g)].length, 1);
+const sidebar = view.match(/<aside\b[^>]*id="dlnm-character-sidebar"[\s\S]*?<\/aside>/)?.[0];
+assert.ok(sidebar);
+assert.doesNotMatch(sidebar, /v-if|v-show/);
+assert.match(sidebar, /:aria-modal="sidebarModal \? true : undefined"/);
+assert.match(view, /aria-controls="dlnm-character-sidebar"\s+:aria-expanded="sidebarModal"/);
+assert.match(view, /const sidebarOpen = ref\(false\)/);
+assert.match(view, /reading\.value\?\.ownerDocument\.defaultView\?\.matchMedia\("\(max-width: 1000px\)"\)/);
+assert.match(view, /removeEventListener\("change", onSidebarMediaChange\)/);
+assert.match(view, /event\.key === "Escape"[\s\S]*?closeSidebar\(\)/);
+assert.match(view, /event\.key === "Tab"[\s\S]*?event\.shiftKey/);
+assert.match(view, /sidebarToggle\.value\?\.focus\(\{ preventScroll: true \}\)/);
+assert.equal([...view.matchAll(/:inert="sidebarModal"/g)].length, 4);
+assert.match(view, /\.status-sidebar \{[^}]*display: none;[^}]*position: absolute;[^}]*inset: 0 auto 0 0;/);
+assert.doesNotMatch(view, /max-height: 32dvh/);
+// Keep the mobile title full-width and the icon-only drawer entry out of the header.
+const header = view.match(/<header\b[\s\S]*?<\/header>/)?.[0] ?? '';
+assert.doesNotMatch(header, /sidebarToggle|status-toggle/);
+assert.match(view, /<div class="nvl-stage">\s*<button\s+v-show="!sidebarModal"[\s\S]*?aria-label="展开人物状态"[\s\S]*?<svg/);
+assert.match(view, /ref="sidebarClose"[^>]*aria-label="收起人物状态"[^>]*>\s*<svg/);
+const mobileStyles = view.slice(view.indexOf('@media (max-width: 1000px)'));
+assert.match(mobileStyles, /\.nvl-header \{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
+assert.match(mobileStyles, /\.header-actions \{[^}]*grid-row: 3/);
+assert.match(mobileStyles, /\.status-toggle \{[^}]*position: absolute;[^}]*top: 50%;[^}]*left: 0;/);
+assert.doesNotMatch(mobileStyles, /max-height: 142px/);
 const status = readFileSync(new URL('../src/CharacterStatus.vue', import.meta.url), 'utf8');
 const statusTemplate = status.slice(status.indexOf('<template>'), status.indexOf('</template>'));
 const folded = [...statusTemplate.matchAll(/<details\b[^>]*>[\s\S]*?<\/details>/g)].map(match => match[0]);
@@ -119,6 +145,14 @@ assert.match(status, /\.character-card \{[^}]*grid-template-columns: min\(32%, 7
 assert.doesNotMatch(status, /@container|repeat\(2, minmax\(0, 1fr\)\)/);
 assert.equal([...statusTemplate.matchAll(/<CardImage\b[^>]*\/>\s*<div class="character-info">\s*<h2>/g)].length, 4);
 const portrait = readFileSync(new URL('../src/CardImage.vue', import.meta.url), 'utf8');
+// Fullscreen decoration and both scrollers share one viewport; background stays outside reading-scroll.
+assert.match(view, /<svg\b[^>]*class="moon"[^>]*aria-hidden="true"[\s\S]*?<path\b[^>]*d="M223\.5 32/);
+assert.match(view, /\.character-panel,\s*\.reading-scroll\s*\{[^}]*scrollbar-width: thin;[^}]*scrollbar-color: #777 #191919;[^}]*overscroll-behavior: contain;/);
+assert.match(view, /<section class="reader-column"[^>]*>\s*<CardImage\b[^>]*class="scene-background"[^>]*\/>\s*<div\s+ref="reading"/);
+assert.match(view, /\.scene-background,\s*\.reading-scroll,[^{]*\{\s*grid-area: 1 \/ 1;/);
+assert.match(portrait, /\.scene-image \{[^}]*min-height: 0;[^}]*height: 100%;[^}]*overflow: hidden;/);
+assert.match(portrait, /\.scene-image img, \.scene-image \.image-placeholder \{[^}]*position: absolute;[^}]*height: 100%;/);
+assert.doesNotMatch(portrait, /position: sticky|min-height: 520px/);
 assert.match(portrait, /img, \.image-placeholder \{[^}]*height: auto;[^}]*object-fit: contain/);
 assert.doesNotMatch(portrait, /height: 14rem/);
 assert.equal([...statusTemplate.matchAll(/<CardImage\b/g)].length, 4);

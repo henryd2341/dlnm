@@ -1,11 +1,11 @@
-import { createCardContent } from './card-content.ts';
+import { cardName, createCardContent } from './card-content.ts';
 
 type CardParts = { schemaScript: string; loaderScript: string; stateHtml: string };
 
 function script(id: string, name: string, content: string) {
   return {
     type: 'script', enabled: true, name, id, content,
-    info: '仅用于 DLNM-P1-香气链路专用测试卡。',
+    info: `仅用于“${cardName}”角色卡。`,
     button: { enabled: false, buttons: [] },
     data: {},
     export_with: { data: true, button: true },

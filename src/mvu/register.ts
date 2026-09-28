@@ -1,8 +1,8 @@
 import { beginBatch, finishBatch, publishSyncStatus, readStateAt, runtimeSchema } from './bridge.ts';
+import { cardName as ownedName } from '../card-content.ts';
 
 // Source/ordering evidence is recorded in DESIGN 7.5 and NEXT. No model calls.
 const schemaUrl = 'https://testingcf.jsdelivr.net/gh/StageDog/tavern_resource@f2f87def1cd1b30143b7aceb5525e758efacebba/dist/util/mvu_zod.js';
-const ownedName = 'DLNM-P1-香气链路';
 
 async function boot() {
   if (getCurrentCharacterName() !== ownedName) return;

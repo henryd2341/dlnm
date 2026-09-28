@@ -2,6 +2,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } fr
 import { readStateAt } from './mvu/bridge.ts';
 import type { State } from './mvu/schema.ts';
 import { visibleBody } from './message-display.ts';
+import { cardName, worldbookName } from './card-content.ts';
 export { visibleBody } from './message-display.ts';
 
 export type WaitingTurn = {
@@ -78,7 +79,7 @@ export function useNvl() {
 
   function context() {
     const value = host.SillyTavern?.getContext();
-    if (!value || value.groupId || getCurrentCharacterName() !== 'DLNM-P1-香气链路') throw Error('请在本卡的单角色聊天中打开阅读界面');
+    if (!value || value.groupId || getCurrentCharacterName() !== cardName) throw Error('请在本卡的单角色聊天中打开阅读界面');
     return value;
   }
   function identity() {
@@ -154,8 +155,8 @@ export function useNvl() {
       if (!isCurrent() || key !== chatKey.value || id !== statePageId() || snapshot.value) return;
       const init = entries.find(entry => entry.name.toLowerCase().includes('[initvar]') && entry.name.includes('DLNM'));
       if (!init) { initDetails.value = `已绑定“${book}”，但未找到本卡的 [initvar] 条目；请核对卡包与世界书版本。`; return; }
-      if (!init.content.trim()) { initDetails.value = `“${book}”的 [initvar] 内容为空；修订包提供完整 YAML 初值，保留旧书并链接 NA 世界书。`; return; }
-      if (book !== 'DLNM-P1-香气链路-世界书-NA') { initDetails.value = `当前绑定的是“${book}”，不是本包的 NA 世界书；保留旧书，导入并链接包内带 -NA 的世界书。`; return; }
+      if (!init.content.trim()) { initDetails.value = `“${book}”的 [initvar] 内容为空；修订包提供完整 YAML 初值，请链接“${worldbookName}”。`; return; }
+      if (book !== worldbookName) { initDetails.value = `当前绑定的是“${book}”；请导入并链接本包的“${worldbookName}”，原书保留。`; return; }
       const data = Mvu.getMvuData({ type: 'message', message_id: id });
       initDetails.value = Object.hasOwn(data.initialized_lorebooks ?? {}, book)
         ? `“${book}”已被 MVU 标记初始化，本楼数据仍缺失或不符合本卡字段；原存档保留，不自动重置。请先保留旧聊天，再以修订卡新建独立开场核对。`

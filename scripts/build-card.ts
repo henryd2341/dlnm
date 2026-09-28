@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createCard } from '../src/card.ts';
+import { cardName } from '../src/card-content.ts';
 import { createLiveLoader } from './live-loader.mjs';
 import { expressionRules } from '../src/images.ts';
 import { assetBaseUrl, devOrigin, hostOrigins } from '../delivery.config.mjs';
@@ -31,7 +32,7 @@ const stateHtml = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"
 const schemaScript = `void import(${JSON.stringify(schemaUrl)}).catch(error => console.error('[DLNM Schema] 资源加载失败，请检查 Vite 服务与资源地址', error));`;
 const loaderScript = `// MVU 183d8ade; dedicated test card only. No model calls.
 void (async () => {
-  if (getCurrentCharacterName() !== 'DLNM-P1-香气链路') return;
+  if (getCurrentCharacterName() !== ${JSON.stringify(cardName)}) return;
   // Always start this card's pinned lifecycle; MVU's unique-script registry chooses the active instance.
   await import('https://testingcf.jsdelivr.net/gh/MagicalAstrogy/MagVarUpdate@183d8ade3b9a3369e824a55cb13b4ddf91aada50/artifact/bundle.js');
 })().catch(error => console.error('[DLNM MVU] 加载失败', error));`;
@@ -39,11 +40,11 @@ const card = createCard({ schemaScript, loaderScript, stateHtml: createLiveLoade
 const content = JSON.stringify(card, null, 2) + '\n';
 const hash = createHash('sha256').update(content).digest('hex');
 const name = `dlnm-mvu-p2-dev-${hash.slice(0, 12)}`;
-const instructions = `# DLNM N4 · 成品 B-R1 布局修订
+const instructions = `# DLNM N5 · 成品 C 内容候选
 
 ## 交付状态
 
-用户已反馈成品 B 基础验证通过；B-R1 仅将人物区改成单列、左图右状态，收紧头像留白。原图、24 字段结构、图片匹配与背景规则保持原样。本修订只完成本地源码、构建和打包；自动测试、typecheck、lint、浏览器、真实酒馆和模型调用均未执行，新布局待用户手验。N5 世界书内容扩充保持后续。
+N5 接入世界书与开场：11 条叙事条目覆盖关系与称谓索引、四名人物、两类地点和四类主题，原有 5 条技术条目保留，共 16 条。正文采用用户最新修订，诺雅、莉莉希雅、塞拉菲娜各有 12、12、10 段分类中文语料，诺雅仍由玩家决定。此说明随本地装配生成，宿主与用户验收另行记录。原图、24 字段、图片映射及 B-R1 单列左右布局保持；前端、Schema 注册与 MVU 加载器统一读取当前卡名。自动测试、typecheck、lint、浏览器和模型调用未由打包器执行。
 
 - 卡版本：${card.data.character_version}；JSON SHA256：${hash}
 - 本次图片来源：**${imageManifest.source === 'development' ? 'development：开发占位图' : 'gremlin：当前角色图包'}**
@@ -55,7 +56,7 @@ const instructions = `# DLNM N4 · 成品 B-R1 布局修订
 ## 启动与更新
 
 1. 在项目根目录运行 npm run dev，保持 ${devOrigin}/ 可访问；Vite 只服务 dist，不公开项目源码或整个 public。
-2. 从 N4 以前的版本升级时，Schema 和世界书属于破坏性升级：按 docs/SYNC.md 执行 npm run sync:push 后新建聊天，旧聊天不迁移/重置/删除。已使用成品 B 的 24 字段聊天升级 B-R1 时，只需第 4 步刷新前端，沿用现有聊天；本修订没有变量迁移。代理本轮没有执行推送。
+2. N5 是内容更新：获准后按 docs/SYNC.md 执行 npm run sync:push，更新世界书与开场；仅刷新前端不会更新内容。已有 N4/B-R1 的 24 字段聊天可继续使用，旧消息及其第 0 楼保持原样；要体验新版开场请另开新聊天。从 N4 以前的旧结构升级仍需新建聊天，旧聊天不迁移/重置/删除。打包器本身没有推送能力。
 3. 初次建立角色才导入 JSON；已有卡用命令行同步。主世界书仍是 ${card.data.character_book.name}，按用户既定要求整本覆盖。保留 3 正则、2 脚本及 MVU 固定版本；[initvar] 提示禁用是正常设置。
 4. 纯前端以后 npm run build，再刷新酒馆或重新渲染消息。已打开的前端不强制中断。构建覆盖 dist/live/state.html 与 artifacts/dlnm-sync.json，历史固定目录保留。
 5. 重新读取状态与图片会重新列当前图包并获取 URL；导入、更新、删除图片后点击它。每次进入轻前端/全屏也重新取图。图片失败不阻断正文或人物数值。
@@ -96,9 +97,49 @@ ${expressionRules.map(([expression, keys], index) => `| ${index + 1} | ${express
 
 宽窄区均按诺雅、莉莉希雅、塞拉菲娜、狸猫单列排列；每项左图右状态。左图栏取卡片内容宽度的 32%，上限 7.5rem；图片按原比例自然高度显示，内边距 .25rem，保留全图，不强行等高。四张头像均在 details 外。诺雅体力、莉莉希雅魔力常显；两人其他字段可折叠。塞拉菲娜与狸猫没有数值条或 details，少量字段直接显示。人物状态来源保留独立折叠入口；全屏人物栏沿用内部滚动。
 
+全屏页头使用内嵌月牙 SVG，状态栏与正文共用细窄暗色滚动条；背景是正文滚动容器的同级图层，尺寸跟随阅读视口，正文和状态各自滚动。宽度 ≤1000px 时，标题独占一行，场景信息及图标操作区依次排在下方；人物状态默认收起，点阅读区左侧中部的右箭头展开，点侧栏左箭头、遮罩或按 Esc 关闭。图标保留操作名称提示和 44px 触控区。桌面状态栏常显，正文阅读位置与流式跟随保持。真实滚动、手机展开/收起、键盘焦点与横竖屏切换待手验。本轮纯展示更新使用固定 UI 地址，已完成 C 内容同步的角色只需刷新页面或重新渲染消息。
+
+月亮图标：[Font Awesome Free 6.7.2 Moon](https://github.com/FortAwesome/Font-Awesome/blob/6.7.2/svgs/solid/moon.svg)，Copyright 2024 Fonticons, Inc.，图标采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)；SVG 路径保持官方版本，沿用界面颜色。授权归属同时内嵌于 SVG metadata，运行时使用本地资源，省去图标字体和额外联网加载。
+
 背景仅映射宅邸起居室/起居室/客厅、宅邸外观/宅邸门外/宅邸正门、宅邸走廊/走廊/廊道。清晨/上午/午后用 day，夜间/深夜用 night，傍晚用 night 并明确提示暂无黄昏图。未映射地点（包括城市）显示缺图状态，不沿用上一地点图片。
 
-## 成品 B 手验清单（基础验证已有用户反馈，B-R1 重点复核 B2）
+## N5 世界书与来源
+
+- 卡名为“${card.data.name}”，绑定世界书为“${card.data.character_book.name}”；两者与维护源码一致。同步目标 PNG 文件名仍由 delivery.config.mjs 单独指定，显示名变化不会自动重命名该文件。
+- ID 0 为禁用的 YAML 初值；ID 2～5 为原有状态投影、字段、输出与正文合同；ID 1 为常驻关系及索引；ID 6～15 按关键词激活。
+- 叙事条目扫描最近 4 条消息，采用不区分大小写的片段匹配，触发概率 100%，禁止条目间递归激活；不扫描人物描述或场景字段来点亮细节。
+- 所有条目仍受宿主世界书预算影响，未改用户全局设置、未强制越过预算。关键词命中不等于最终进入提示；请检查实际上下文和截断情况。长时间只用代词或没有主题词时，条件条目可能不命中，常驻索引只提供简要身份。
+- 来源与审阅文稿留在 ${resolve(root, 'docs/N5-世界书草稿.md')}，运行源码是 ${resolve(root, 'src/card-content.ts')}；角色卡不读取 Markdown 文档，来源表、哈希与审批文字不进入叙事条目。
+
+| ID | 条目 | 触发 |
+| --- | --- | --- |
+${card.data.character_book.entries.map(entry => `| ${entry.id} | ${entry.comment} | ${!entry.enabled ? '禁用，仅初始化读取' : entry.constant ? '常驻' : entry.keys.join('、')} |`).join('\n')}
+
+设定整理依据用户本地日文对照 ManualTransFile.json，674,888 字节，SHA256：5D4E0725FEC2421FA3BE62E895FF6FB93DA1055E3655332AA338984F7500686E。该对照的中文值存在错译与顺移，日文键优先。三人的 34 段语料另依据用户提供的 scenario/*.ks 脚本，以角色标记核对说话者和分支后翻译为简体中文；逐段行号见来源文稿第七节。下表保留设定整理的定位摘要，完整 19 项对照见文稿。
+
+| 条目 | 原文定位 | 采用边界 |
+| --- | --- | --- |
+| 关系与香气（1、12） | L1694～1770、5381～5397 | 留任分支；铃兰已赠、未来同行已有回应、共用香气未找到；明确恋人与续篇首日起点为项目选择 |
+| 诺雅（6） | L408～412、955～956、1092～1096、1680～1748、2727～2751、3435～3451 | 修道院出身与成长；当前四色取已有设计；内侧发色只对应进展片段 |
+| 莉莉希雅（7） | L325～398、680～714、782～785、3445～3447、4433～4465、4525～4527、4578～4605 | 人魔混血与魅魔自述并存；能力有限度，不补全知或隐藏创伤 |
+| 塞拉菲娜／狸猫（8、9） | L299～322、569～599、917～918、1646～1704、3439、4622～4640 | 主教、老师与旧识；部分发言依语境推定；狸猫真实身份未定，L320～322 观察者未定 |
+| 城市与宅邸（10、11） | L843～855、886～901、1042～1112、3453～3468、3503～3513 | 城市“只有女性”不推及全世界；起源保留书内传说；无完整地图 |
+| 香气／色彩（12、13） | L861～901、920～939、1126～1128、1169～1187、2683～2689 | 理论和个人经历分开；气味或文字染色不自动发放颜色 |
+| 魔族／神圣术（14、15） | L905～918、958～1003、1229～1262 | 书内学说、礼俗及宗教历史，不推成莉莉希雅个人的完整生理规律 |
+
+## 成品 C 待手验
+
+| 编号 | 操作 | 预期 |
+| --- | --- | --- |
+| C1 | 获准同步后核对卡片绑定与世界书，再新建聊天 | 绑定 ${card.data.character_book.name}，含 16 条；出现新版起居室开场；24 字段初始化和前端仍工作 |
+| C2 | 分别谈及诺雅、莉莉希雅、塞拉菲娜、狸猫并查看实际提示 | 命中对应人物资料，前三人含分类中文语料；单个名字不通过索引递归加载整本书 |
+| C3 | 分别谈及瑟雷妮亚、庭院、香气、色视、魔族、神圣术 | 对应地点／主题命中；书内观点与原作／续篇分层，无预算遗漏关键条目 |
+| C4 | 接受、推迟、改变香气计划各体验一次 | 延续已答应的未来约定，今天仍可商量；不代写诺雅的决定，不强制奖励或出行 |
+| C5 | 在原有 24 字段聊天继续，再回看旧消息与分支 | 旧开场、变量和历史保持；当前内容更新不重写旧消息，技术更新协议与状态显示有效 |
+
+这些场景只是手验清单，打包器没有调用模型、打开浏览器、推送或记录用户接受。
+
+## 成品 B 回归清单（既有基础反馈保留，不代替本包手验）
 
 | 编号 | 操作 | 预期 |
 | --- | --- | --- |
@@ -113,7 +154,7 @@ ${expressionRules.map(([expression, keys], index) => `| ${index + 1} | ${express
 | B9 | 更新/删除/重新导入图包后重新读取，刷新与反复全屏 | 新图片可见，过期Blob不复用，不主动revoke破坏另一视图 |
 | B10 | 按已有A/W清单回归流式、非流式、等待、停止、Markdown/染色 | 原已验收链路保留；单独记录本包实际运行证据 |
 
-现有 scripts/check-nvl.ts 已同步单列与左右栏检查，未运行；其他检查亦未执行。构建输出与源代码回读仅是离线证据，新布局的实际 CSS、宿主加载、窄屏与手机表现仍待手验。历史固定资源和成品包保留，不另建备份目录，不自动提交。
+现有检查脚本仍含旧卡名、旧世界书名及旧文稿结构断言，后续运行前需按确认后的结构维护；本次打包未执行测试、typecheck 或 lint。构建输出与源码回读属于离线证据，宿主上下文、预算、实际剧情与手机表现仍待手验。历史固定资源和成品包保留，不另建备份目录，不自动提交。
 `;
 // Immutable checkpoints: allow identical re-packs, stop on any content collision.
 const outputs = new Map([

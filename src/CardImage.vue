@@ -53,8 +53,8 @@ function expired() { src.value = ''; message.value = '图片地址已失效，�
 img, .image-placeholder { box-sizing: border-box; display: block; width: 100%; height: auto; padding: .25rem; object-fit: contain; }
 .image-placeholder { display: grid; place-content: center; aspect-ratio: 3 / 4; color: #aaa; border: 1px dashed #555; }
 figcaption { min-height: 2.5em; padding: .25rem .5rem; color: #b9b6b0; font: .7rem/1.4 sans-serif; overflow-wrap: anywhere; }
-.scene-image { position: relative; min-height: 520px; height: 100%; filter: grayscale(1); }
-.scene-image img, .scene-image .image-placeholder { position: sticky; top: 0; height: min(100dvh, 760px); min-height: 520px; padding: 0; object-fit: cover; }
+.scene-image { position: relative; min-height: 0; height: 100%; overflow: hidden; filter: grayscale(1); }
+.scene-image img, .scene-image .image-placeholder { position: absolute; inset: 0; height: 100%; padding: 0; object-fit: cover; }
 .scene-image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #050505d9, #111a 48%, #050505de), linear-gradient(0deg, #060606de, transparent 45%, #090909b3); }
 .scene-image figcaption { position: absolute; z-index: 1; top: .5rem; right: .5rem; max-width: calc(100% - 1rem); background: #111d; }
 </style>
