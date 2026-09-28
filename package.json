@@ -6,12 +6,14 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "vue-tsc --noEmit",
-    "test": "node scripts/check-mvu-schema.ts && node scripts/check-mvu-bridge.ts && node scripts/check-card.ts",
+    "test": "node scripts/check-mvu-schema.ts && node scripts/check-mvu-bridge.ts && node scripts/check-card.ts && node scripts/check-images.ts && node scripts/check-message-display.ts && node scripts/check-nvl.ts && node scripts/check-loader.ts && node scripts/check-sync.mjs",
     "build": "vite build --mode schema && vite build && npm run pack",
     "pack": "node scripts/build-card.ts",
     "sync": "node tavern_sync.mjs",
     "sync:push": "npm run build && node tavern_sync.mjs push",
-    "check:sync": "node scripts/check-sync.mjs"
+    "check:sync": "node scripts/check-sync.mjs",
+    "check:release": "node scripts/check-release.ts",
+    "release": "npm run typecheck && npm test && npm run build && npm run check:release"
   },
   "dependencies": {
     "vue": "3.5.43",

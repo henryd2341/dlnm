@@ -7,11 +7,12 @@ const controller = new AbortController();
 window.addEventListener('pagehide', () => controller.abort(), { once: true });
 const showError = error => {
   if (controller.signal.aborted) return;
-  document.getElementById('dlnm-state').textContent = '阅读界面加载失败，请检查 Vite 服务后刷新酒馆。';
+  document.getElementById('dlnm-state').textContent = '阅读界面加载失败，请检查资源地址与网络后刷新酒馆。';
   console.error('[DLNM UI]', error);
 };
 void (async () => {
-  const response = await fetch(${url}, { cache: 'no-store', signal: controller.signal });
+  const options = { cache: 'no-store', redirect: 'error', credentials: 'omit', signal: controller.signal };
+  const response = await fetch(${url}, options);
   if (!response.ok) throw Error('HTTP ' + response.status);
   const page = new DOMParser().parseFromString(await response.text(), 'text/html');
   if (controller.signal.aborted) return;
@@ -19,14 +20,24 @@ void (async () => {
   const root = page.getElementById('dlnm-state');
   const entry = page.querySelector('script[data-dlnm-entry]');
   if (!style || !root || !entry) throw Error('前端资源缺少样式、挂载点或入口');
-  const source = new URL(entry.getAttribute('src'), response.url);
+  const path = entry.getAttribute('src');
+  if (!path) throw Error('前端入口地址为空');
+  const source = new URL(path, response.url);
   if (source.origin !== new URL(${url}).origin) throw Error('前端入口来源不匹配');
+  const bundle = await fetch(source.href, options);
+  if (!bundle.ok) throw Error('JS HTTP ' + bundle.status);
+  const code = await bundle.text();
+  if (controller.signal.aborted) return;
+  if (!code.trim()) throw Error('前端入口内容为空');
   document.head.append(document.importNode(style, true));
   document.getElementById('dlnm-state').replaceWith(document.importNode(root, true));
   const script = document.createElement('script');
-  script.src = source.href;
-  script.onerror = showError;
-  document.body.append(script);
+  script.textContent = code;
+  // Inline classic scripts execute during append; their exceptions dispatch on window.
+  const scriptError = event => showError(event.error || new Error(event.message));
+  window.addEventListener('error', scriptError);
+  try { document.body.append(script); }
+  finally { window.removeEventListener('error', scriptError); }
 })().catch(showError);
 })();
 </script></body></html>`;

@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { devOrigin, hostOrigins, assetBaseUrl, imageSource } from './delivery.config.mjs';
 import { developmentImages } from './src/images.ts';
 
@@ -13,13 +12,13 @@ const source = process.env.DLNM_IMAGE_SOURCE || imageSource;
 if (!['development', 'gremlin'].includes(source)) throw Error('Unknown DLNM_IMAGE_SOURCE');
 const images = source === 'development' ? developmentImages.map(image => {
   const bytes = readFileSync(new URL(`./public/${image.source}`, import.meta.url));
-  const sha256 = createHash('sha256').update(bytes).digest('hex');
-  return { ...image, bytes, sha256, path: `n4-images/${image.name.replace(/\.png$/, '')}-${sha256.slice(0, 12)}.png` };
+  return { ...image, bytes, path: `n4-images/${image.name}` };
 }) : [];
 
 export default defineConfig(({ command, mode }) => ({
   // Serve only packaged assets, not project sources or local reference files.
   root: command === 'serve' ? distRoot : projectRoot,
+  base: command === 'serve' ? '/' : new URL(assetBaseUrl).pathname,
   publicDir: false,
   plugins: [vue(), {
     name: 'dlnm-selected-images',
@@ -29,7 +28,7 @@ export default defineConfig(({ command, mode }) => ({
       this.emitFile({ type: 'asset', fileName: 'image-manifest.json', source: JSON.stringify({
         source, images: developmentImages.map(image => {
           const asset = images.find(item => item.name === image.name);
-          return { ...image, ...(asset ? { path: asset.path, bytes: asset.bytes.length, sha256: asset.sha256 } : {}) };
+          return { ...image, ...(asset ? { path: asset.path, bytes: asset.bytes.length } : {}) };
         }),
       }, null, 2) + '\n' });
     },
@@ -49,6 +48,7 @@ export default defineConfig(({ command, mode }) => ({
   build: {
     outDir: distRoot,
     emptyOutDir: false,
+    rolldownOptions: { output: { assetFileNames: '[name][extname]', chunkFileNames: '[name].js' } },
     lib: {
       entry: mode === 'schema' ? 'src/mvu/register.ts' : 'src/state-entry.ts',
       cssFileName: 'state',

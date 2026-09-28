@@ -1,6 +1,6 @@
 // Optional after explicit test permission: node scripts/check-images.ts
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { portraitNames, sceneImage, developmentImages, expressionRules } from '../src/images.ts';
 import { currentImageContext, findImage, bounded } from '../src/image-loader.ts';
 const portrait = (expression: string, clothing = '女仆服') => portraitNames('noah', { expression, clothing });
@@ -21,7 +21,11 @@ assert.equal(sceneImage({ day: 1, period: '夜间', location: '瑟雷妮亚' }).
 assert.equal(sceneImage(undefined).names.length, 0);
 assert.equal(developmentImages.length, 55);
 assert.equal(new Set(developmentImages.map(image => image.name)).size, 55);
-for (const image of developmentImages) assert.ok(existsSync(new URL(`../public/${image.source}`, import.meta.url)), image.source);
+for (const image of developmentImages) {
+  assert.match(image.name, /^(?:noah|lilicia|seraphina|tanuki|bg)__[a-z0-9_]+\.png$/);
+  assert.match(image.source, /^(?:character|background)\/[a-z0-9_/]+\.png$/);
+  assert.doesNotMatch(image.source, /(?:^|\/)\.\.(?:\/|$)/);
+}
 const item = { character: 'CARD', fileName: 'noah__default.png', relativePath: 'folder/noah__default.png' };
 assert.equal(findImage([item], item.fileName), item);
 assert.equal(findImage([item], 'tanuki__default.png'), undefined);

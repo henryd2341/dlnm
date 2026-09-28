@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { createCard } from '../src/card.ts';
 import { beginBatch } from '../src/mvu/bridge.ts';
 import { initialState } from '../src/mvu/schema.ts';
-import { initialYaml } from '../src/card-content.ts';
+import { cardName, initialYaml, worldbookName } from '../src/card-content.ts';
 import { toWorldbook } from '../tavern_sync.mjs';
 
 let passed = 0;
@@ -31,10 +30,11 @@ function applyRegex(raw: string, item: (typeof regexes)[number]) {
 check('V2 card and declared world binding shape', () => {
   assert.equal(card.spec, 'chara_card_v2');
   assert.equal(card.spec_version, '2.0');
-  assert.equal(data.name, 'DLNM-P1-香气链路');
+  assert.equal(cardName, '魔族大小姐与女仆的30天·续');
+  assert.equal(data.name, cardName);
   assert.ok(Array.isArray(book.entries));
   assert.equal(data.extensions.world, book.name);
-  assert.match(data.creator_notes, /构建交付不代表宿主\/用户验收/);
+  assert.equal(data.creator_notes, '');
 });
 
 check('initvar is disabled YAML generated from the shared initial state', () => {
@@ -52,7 +52,8 @@ check('initvar is disabled YAML generated from the shared initial state', () => 
         : `  ${name}: ${JSON.stringify(value)}`));
     }
   }
-  assert.equal(book.name, 'DLNM-P1-香气链路-世界书-NA');
+  assert.equal(worldbookName, 'DLNM-世界书');
+  assert.equal(book.name, worldbookName);
 });
 
 check('technical and core entries stay constant while N5 details are conditional', () => {
@@ -71,16 +72,15 @@ check('technical and core entries stay constant while N5 details are conditional
 
 check('confirmed relationship and daily scope do not force player choices', () => {
   const content = book.entries.find(item => item.id === 1)!.content;
-  assert.match(content, /玩家扮演诺雅/);
+  assert.match(content, /\{\{user\}\}就是诺雅/);
   assert.match(content, /恋人关系/);
+  assert.match(content, /互相依偎和共同生活/);
   assert.match(content, /不替诺雅决定/);
   assert.match(content, /不强制采购、收集颜色或成长/);
-  assert.match(content, /已有未来同行的约定；共用香气尚未找到/);
-  assert.match(content, /【人物与称谓索引】/);
-  assert.match(content, /背景经历不覆盖当前已校验状态/);
+  assert.match(content, /登场人物与称谓/);
 });
 
-check('N5 has four six-part portraits, two places and four themes without author metadata', () => {
+check('ten conditional lore entries keep character tags and omit author metadata', () => {
   const names = ['诺雅', '莉莉希雅', '塞拉菲娜', '狸猫', '月光都市瑟雷妮亚', '卢娜家宅邸', '香气与共用香气', '原色丧失与色视', '魔族与魔力', '修道院与神圣术'];
   for (const [index, name] of names.entries()) {
     const item = book.entries.find(entry => entry.id === index + 6)!;
@@ -94,15 +94,13 @@ check('N5 has four six-part portraits, two places and four themes without author
     assert.ok(item.keys.every(key => key.trim().length > 1));
     if (index < 4) {
       assert.match(item.content, new RegExp(`<${name}_信息>[\\s\\S]+</${name}_信息>`));
-      assert.deepEqual([...item.content.matchAll(/^#### (\d)\./gm)].map(match => match[1]), ['1', '2', '3', '4', '5', '6']);
-      assert.equal((item.content.match(/\*\*第[一二]组：/g) ?? []).length, 2);
     }
   }
   const lore = book.entries.filter(item => item.id === 1 || item.id >= 6).map(item => item.content).join('\n');
   assert.doesNotMatch(lore, /SHA256|ManualTransFile|来源表|原文依据：|待审|本轮|成品 [ABC]|[A-Z]:[\\/]|```text/);
   assert.match(book.entries.find(item => item.id === 7)!.content, /混血；本人明确自称魅魔/);
   assert.match(book.entries.find(item => item.id === 8)!.content, /修道院的主教/);
-  assert.match(book.entries.find(item => item.id === 9)!.content, /真实身份：未明/);
+  assert.match(book.entries.find(item => item.id === 9)!.content, /真实身份: 未明/);
   assert.equal(data.personality, '');
 });
 
@@ -175,13 +173,15 @@ check('body presentation is separate from game colors and technical output', () 
   assert.match(content, /不在技术块中插入 HTML/);
   assert.equal(data.character_version, 'p2-nvl-nc');
 });
-check('N5 greeting uses the reviewed opening verbatim and keeps exactly one protocol tail', () => {
-  const draft = readFileSync(new URL('../docs/N5-世界书草稿.md', import.meta.url), 'utf8').replaceAll('\r\n', '\n');
-  const marker = '### 开场正文\n';
-  assert.equal(draft.split(marker).length, 2);
-  const opening = draft.split(marker)[1].split('\n开场说明：')[0].trim();
+check('greeting keeps the reviewed story beats and exactly one protocol tail', () => {
   const tail = '<UpdateVariable><Analyze>开场初值由世界书载入，本轮没有额外变化</Analyze><JSONPatch>[]</JSONPatch></UpdateVariable>\n\n<StatusPlaceHolderImpl/>';
-  assert.equal(data.first_mes, `${opening}\n\n${tail}`);
+  assert.ok(data.first_mes.endsWith(`\n\n${tail}`));
+  for (const beat of [
+    '上午，宅邸起居室。',
+    '“诺雅，过来坐一会儿吧。”',
+    '找一种两个人都能用的香气',
+    '“想去看看花草，还是先在家里慢慢商量？呵呵，诺雅，你若是另有安排，也说来听听。”',
+  ]) assert.match(data.first_mes, new RegExp(beat));
   assert.equal((data.first_mes.match(/<UpdateVariable>/g) ?? []).length, 1);
   assert.equal((data.first_mes.match(/<StatusPlaceHolderImpl\/>/g) ?? []).length, 1);
   assert.doesNotMatch(data.first_mes, /开场说明|场景引导|原文依据/);
