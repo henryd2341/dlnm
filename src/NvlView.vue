@@ -63,7 +63,13 @@ const selectedPage = computed(() =>
   selectedIndex.value < 0 ? null : props.pages[selectedIndex.value],
 );
 const latestPage = computed(() => props.pages[props.pages.length - 1] ?? null);
-const scene = computed(() => sceneImage(props.snapshot?.world));
+// Keep the last recognized scene within this chat, including while its image loads.
+const scene = computed<ReturnType<typeof sceneImage> & { chatKey: string }>(
+  (previous) => ({
+    ...sceneImage(props.snapshot?.world, previous?.chatKey === props.chatKey ? previous : undefined),
+    chatKey: props.chatKey,
+  }),
+);
 const positionKey = computed(() =>
   selectedPage.value
     ? `${props.chatKey}:${selectedPage.value.viewKey ?? `${selectedPage.value.id}:${selectedPage.value.swipe}`}`

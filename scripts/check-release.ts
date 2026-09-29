@@ -36,7 +36,7 @@ for (const path of ['artifacts/dlnm-gremlin.json', 'artifacts/dlnm-sync.json']) 
 const manifest = JSON.parse(read('artifacts/release/image-manifest.json'));
 assert.equal(manifest.source, 'gremlin');
 assert.deepEqual(manifest.images, developmentImages, 'Gremlin manifest lists names, not copied development assets');
-assert.equal(new Set(manifest.images.map((image: { name: string }) => image.name)).size, 55);
+assert.equal(new Set(manifest.images.map((image: { name: string }) => image.name)).size, 69);
 
 const schema = read('dist/schema.js');
 const state = read('dist/state.js');
