@@ -556,7 +556,7 @@ onBeforeUnmount(() => {
         @keydown="onComposerKeydown"
       ></textarea>
       <div class="composer-actions">
-        <small>Ctrl + Enter 发送；输入法选字期间不会触发</small>
+        <small>Ctrl + Enter 发送</small>
         <button
           v-if="busy"
           type="button"

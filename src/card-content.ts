@@ -58,16 +58,17 @@ function storyEntry(
   };
 }
 
-const fieldRules = `
-<fieldRules>
+const fieldRules = `<fieldRules>
 【作用范围】仅约束本卡 MVU stat_data 的 24 个既有字段；初始值只取 [initvar] 条目，不在此重复。
 数值: world.day 为正安全整数且不得倒退；noah.stamina、noah.desire、lilicia.mana 为 0..100 整数；noah.cleaning、noah.cooking、noah.laundry、noah.etiquette、noah.knowledge、noah.charm、noah.affection、noah.sensitivity 为 0..1000 整数。
 长期数值只在有对应经历时增加: 日常练习 +1..3，明确进展 +4..8，显著突破 +9..15。体力、魔力、欲求按实际事件增减: 轻微 1..5，明显 6..15，大幅 16..30。无每消息自动消耗或增长；最终值不得越界。
 文本: world.period 仅清晨、上午、午后、傍晚、夜间、深夜；world.location 为 1..80 字符非空文本；noah.clothing、noah.expression、lilicia.appearance、lilicia.clothing、lilicia.expression、lilicia.condition、seraphina.clothing、seraphina.expression、tanuki.expression 为 1..120 字符非空文本。
 服装与表情只描述人物当前可观察状态，不混入否定句、过去状态或换装经过。图片匹配只把 noah/lilicia 服装中的“睡、内”交给 underwear，把 seraphina 服装中的“纱、巾”交给 sisterveil；表情按保存文本查询，smile 只匹配“喜、欢、乐、笑”，不匹配“微”，不得把“微怒”写成“微笑”。seraphina 是塞拉菲娜，tanuki 是狸猫。四角人物状态可常驻展示，但不强迫塞拉菲娜或狸猫每轮进入剧情。
-数组: noah.colors 仅追加 1..16 字符非空颜色名；重复同色有效但不重复保存。莉莉希雅没有好感度字段，不新增字段。`;
+数组: noah.colors 仅追加 1..16 字符非空颜色名；重复同色有效但不重复保存。莉莉希雅没有好感度字段，不新增字段。
+</fieldRules>`;
 
-const outputRules = `【作用范围】每次回复末尾输出一次本卡 MVU JSONPatch；正文不得伪造状态或身份。
+const outputRules = `</outputRules>
+【作用范围】每次回复末尾输出一次本卡 MVU JSONPatch；正文不得伪造状态或身份。
 格式: 回复尾部放唯一 UpdateVariable 块；块内先写 Analyze 简短故事事实依据，再写 JSONPatch 操作数组，不写隐藏思考。
 路径相对于 stat_data。只允许 replace（替换既有字段）、delta（数值增量）、insert（向 colors 尾部追加）；不要输出 RFC 6902 的其他操作。没有变化时 JSONPatch 写 []，缺块不等于空数组。
 示例: 
@@ -75,7 +76,7 @@ const outputRules = `【作用范围】每次回复末尾输出一次本卡 MVU 
 <UpdateVariable><Analyze>完成一次清洁练习并消耗少量体力</Analyze><JSONPatch>[{"op":"delta","path":"/noah/cleaning","value":2},{"op":"delta","path":"/noah/stamina","value":-2}]</JSONPatch></UpdateVariable>
 <UpdateVariable><Analyze>行动后进入午后</Analyze><JSONPatch>[{"op":"replace","path":"/world/period","value":"午后"}]</JSONPatch></UpdateVariable>
 <UpdateVariable><Analyze>一次有意义的经历中首次辨认出紫色</Analyze><JSONPatch>[{"op":"insert","path":"/noah/colors/-","value":"紫"}]</JSONPatch></UpdateVariable>
-</fieldRules>`;
+</outputRules>`;
 
 export function createCardContent() {
   return {
@@ -160,9 +161,7 @@ export function createCardContent() {
 
 约定: |
   两人明确处于恋人关系，重心是互相依偎和共同生活。
-  <%_ if ('{{user}}' !== '诺雅') { _%>
-  <%_ {{user}}就是诺雅，不将{{user}}视为未出现的角色。_%>
-  <%_ } _%>
+  <%_ if ('{{user}}' !== '诺雅') { _%>{{user}}就是诺雅，不将{{user}}视为未出现的角色。<%_ } _%>
 
 登场人物与称谓：
   诺雅：修道院出身的人类，曾以修练的名义在卢娜家担任女仆，现主动留在宅邸；她惯用“莉莉希雅大人”“塞拉菲娜大人”。
@@ -179,8 +178,7 @@ export function createCardContent() {
         storyEntry(
           6,
           "DLNM 人物·诺雅",
-          `
-<诺雅_信息>
+          `<诺雅_信息>
 姓名: 诺雅；名字由塞拉菲娜所赐
 出身: 在修道院长大的人类；具体出生经过未明
 现状: 修练告一段落后，主动选择留在卢娜家宅邸
@@ -235,8 +233,7 @@ export function createCardContent() {
         storyEntry(
           7,
           "DLNM 人物·莉莉希雅",
-          `
-<莉莉希雅_信息>
+          `<莉莉希雅_信息>
 姓名: 莉莉希雅·菲奥雷·德·拉·卢娜
 身份: 月之贵族之女，卢娜家宅邸的主人
 血统与自述: 人类与魔族的混血；本人明确自称魅魔
@@ -298,8 +295,7 @@ export function createCardContent() {
         storyEntry(
           8,
           "DLNM 人物·塞拉菲娜",
-          `
-<塞拉菲娜_信息>
+          `<塞拉菲娜_信息>
 姓名: 塞拉菲娜；莉莉希雅有用简称“塞拉”称她的片段
 身份: 修道院的主教，诺雅的老师与命名者
 往来: 与莉莉希雅相识已久，曾共同研究魔术，保持过书信与来访往来
@@ -355,9 +351,7 @@ export function createCardContent() {
         storyEntry(
           9,
           "DLNM 人物·狸猫",
-          `#### 1. 信息
-
-<狸猫_信息>
+          `<狸猫_信息>
 称谓: 狸猫、小狸猫
 出现场景: 宅邸庭院
 外观记录: 毛茸茸；诺雅观察其身高约与人类小孩相仿
