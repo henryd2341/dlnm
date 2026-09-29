@@ -240,10 +240,12 @@ check('state HTML replacement is safe from regex dollar capture expansion', () =
   assert.equal(compile(item.findRegex).global, false);
 });
 
-check('two enabled Tavern Helper scripts use the verified pack shape', () => {
+check('three enabled Tavern Helper scripts use the verified pack shape', () => {
   const scripts = data.extensions.tavern_helper.scripts;
-  assert.equal(scripts.length, 2);
-  assert.deepEqual(scripts.map(item => item.content), ['SCHEMA_SCRIPT();', 'LOADER_SCRIPT();']);
+  assert.equal(scripts.length, 3);
+  assert.deepEqual(scripts.slice(0, 2).map(item => item.content), ['SCHEMA_SCRIPT();', 'LOADER_SCRIPT();']);
+  assert.equal(scripts[2].id, 'dlnm-latest-message-only');
+  assert.equal(new Set(scripts.map(item => item.id)).size, scripts.length);
   assert.match(scripts[1].name, /MVU 运行组件加载器/);
   for (const item of scripts) {
     assert.equal(item.type, 'script');
@@ -252,6 +254,76 @@ check('two enabled Tavern Helper scripts use the verified pack shape', () => {
     assert.deepEqual(item.data, {});
     assert.deepEqual(item.export_with, { data: true, button: true });
   }
+});
+
+function loadLatestMessageScript(readyState: string, hasLatest = true) {
+  const source = data.extensions.tavern_helper.scripts.find(item => item.id === 'dlnm-latest-message-only')!.content;
+  assert.doesNotMatch(source, /\bjQuery\b|\$\s*\(/);
+  const removed: number[] = [];
+  const document = Object.assign(new EventTarget(), { readyState });
+  const window = Object.assign(new EventTarget(), { parent: { document: {
+    querySelector: (selector: string) => {
+      assert.equal(selector, '#chat > .mes.last_mes');
+      return hasLatest ? {} : null;
+    },
+    querySelectorAll: (selector: string) => {
+      assert.equal(selector, '#chat > .mes:not(.last_mes)');
+      assert.ok(hasLatest, 'keep the view intact before a latest row exists');
+      return [0, 1].map(id => ({ remove: () => removed.push(id) }));
+    },
+  } } });
+  let changed: ((id: string) => void) | undefined;
+  let reloads = 0, subscriptions = 0, stopped = 0;
+  runInNewContext(source, {
+    document, window,
+    SillyTavern: { getCurrentChatId: () => 'chat-a' },
+    tavern_events: { CHAT_CHANGED: 'chat_id_changed' },
+    eventOn: (event: string, callback: (id: string) => void) => {
+      assert.equal(event, 'chat_id_changed');
+      changed = callback; subscriptions++;
+      return { stop: () => { changed = undefined; stopped++; } };
+    },
+    reloadIframe: () => { reloads++; },
+  });
+  return {
+    removed, ready: () => document.dispatchEvent(new Event('DOMContentLoaded')),
+    close: () => window.dispatchEvent(new Event('pagehide')),
+    change: (id: string) => changed?.(id),
+    counts: () => ({ reloads, subscriptions, stopped }),
+  };
+}
+
+check('native latest-message script waits for readiness and only removes old host rows', () => {
+  for (const state of ['loading', 'interactive', 'complete']) {
+    const view = loadLatestMessageScript(state);
+    if (state === 'loading') {
+      assert.deepEqual(view.removed, []);
+      assert.equal(view.counts().subscriptions, 0);
+    }
+    view.ready(); view.ready();
+    assert.deepEqual(view.removed, [0, 1]);
+    assert.equal(view.counts().subscriptions, 1);
+    view.change('chat-a');
+    assert.equal(view.counts().reloads, 0);
+    view.change('chat-b'); view.change('chat-b');
+    assert.equal(view.counts().reloads, 1);
+    view.change('');
+    assert.equal(view.counts().reloads, 2);
+    view.close(); view.close(); view.change('chat-c');
+    assert.deepEqual(view.counts(), { reloads: 2, subscriptions: 1, stopped: 1 });
+  }
+});
+
+check('latest-message script preserves an unfinished view and cancels pending startup on close', () => {
+  const missing = loadLatestMessageScript('complete', false);
+  assert.deepEqual(missing.removed, []);
+  missing.change('chat-b');
+  assert.equal(missing.counts().reloads, 1);
+  missing.close();
+  const early = loadLatestMessageScript('loading');
+  early.close(); early.ready(); early.change('chat-b');
+  assert.deepEqual(early.removed, []);
+  assert.deepEqual(early.counts(), { reloads: 0, subscriptions: 0, stopped: 0 });
 });
 
 check('component inputs are required', () => {

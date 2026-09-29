@@ -44,11 +44,14 @@ new Function(schema);
 new Function(state);
 const card = JSON.parse(read('artifacts/release/dlnm.json'));
 const scripts = card.data.extensions.tavern_helper.scripts;
-assert.equal(scripts.length, 2);
+assert.equal(scripts.length, 3);
 assert.equal(scripts[0].content, schema, 'embed the schema that was built for this card');
 assert.match(scripts[1].content, /MagVarUpdate@183d8ade3b9a3369e824a55cb13b4ddf91aada50\/artifact\/bundle\.js/);
 assert.ok(scripts[1].content.includes(JSON.stringify(card.data.name)));
 new Function(scripts[1].content);
+assert.equal(scripts[2].id, 'dlnm-latest-message-only');
+assert.equal(scripts[2].enabled, true);
+new Function(scripts[2].content);
 assert.deepEqual(card, createCard({
   schemaScript: schema,
   loaderScript: scripts[1].content,

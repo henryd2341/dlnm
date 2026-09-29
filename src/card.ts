@@ -57,6 +57,32 @@ export function createCard({ schemaScript, loaderScript, stateHtml }: CardParts)
           scripts: [
             script('dlnm-mvu-schema', 'DLNM · MVU Zod Schema', schemaScript),
             script('dlnm-mvu-runtime-loader', 'DLNM · MVU 运行组件加载器', loaderScript),
+            script('dlnm-latest-message-only', 'DLNM · 仅保留最新楼层', `(() => {
+  let stopChatListener;
+  function initialize() {
+    // Helper scripts live in an iframe; only remove host DOM, never chat data.
+    const hostDocument = window.parent.document;
+    if (hostDocument.querySelector('#chat > .mes.last_mes')) {
+      hostDocument.querySelectorAll('#chat > .mes:not(.last_mes)').forEach(message => message.remove());
+    }
+    let currentChatId = SillyTavern.getCurrentChatId();
+    stopChatListener = eventOn(tavern_events.CHAT_CHANGED, chatId => {
+      if (currentChatId !== chatId) {
+        currentChatId = chatId;
+        reloadIframe();
+      }
+    }).stop;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize, { once: true });
+  } else {
+    initialize();
+  }
+  window.addEventListener('pagehide', () => {
+    document.removeEventListener('DOMContentLoaded', initialize);
+    stopChatListener?.();
+  }, { once: true });
+})();`),
           ],
         },
       },

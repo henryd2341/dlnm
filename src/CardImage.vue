@@ -41,7 +41,7 @@ function expired() { src.value = ''; message.value = '图片地址已失效，�
     <img v-if="src" :key="src" :src="src" :alt="`${label} · ${selected}`" @error="expired" />
     <div v-else class="image-placeholder" role="img" :aria-label="`${label}暂无图片`">{{ label }}</div>
     <figcaption>
-      <span>{{ imageSource === 'development' ? '开发占位图' : '当前角色图包' }}</span>
+      <!-- <span>{{ imageSource === 'development' ? '开发占位图' : '当前角色图包' }}</span> -->
       <span v-if="note && names.length"> · {{ note }}</span>
       <span v-if="message" role="status"> · {{ message }}</span>
     </figcaption>
